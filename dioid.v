@@ -271,15 +271,15 @@ Proof. by case V => [ T [c] []] eps ADD e []. Qed.
 Section ClosedPredicates.
 
 Variable S : predPredType V.
- 
+
 Definition addd_closed := 0 \in S /\ {in S &, forall u v, u + v \in S}.
 Definition muld_closed := 1 \in S /\ {in S &, forall u v, u * v \in S}.
 Definition semiring_closed := addd_closed /\ muld_closed.
 
 Lemma semiring_closedA : semiring_closed -> addd_closed.
-Proof. case=> [Sa _]; apply Sa. Qed.
+Proof. case=> [Sa _]; apply: Sa. Qed.
 Lemma semiring_closedM : semiring_closed -> muld_closed.
-Proof. case=> [_ Sm]; apply Sm. Qed.
+Proof. case=> [_ Sm]; apply: Sm. Qed.
 
 End ClosedPredicates.
 
@@ -430,7 +430,7 @@ Lemma adddd : @idempotent D (add D).
 Proof. by case D => [c [T]]. Qed.
 
 Lemma led_0_1 : @led D 0 1.
-Proof. by apply /eqP; rewrite add0d. Qed.
+Proof. by apply/eqP; rewrite add0d. Qed.
 
 Lemma led_reflexive : @reflexive D <=%D.
 Proof. by move=> a; rewrite /led; rewrite adddd. Qed.
@@ -438,7 +438,7 @@ Proof. by move=> a; rewrite /led; rewrite adddd. Qed.
 Lemma led_trans : @transitive D <=%D.
 Proof.
 move=> a b c. rewrite /led => /eqP A /eqP <-. rewrite -{2}A.
-apply /eqP /adddA.
+apply/eqP /adddA.
 Qed.
 
 Lemma led_antisym : @antisymmetric D <=%D.
@@ -448,15 +448,15 @@ Qed.
 
 Lemma led_add2r (c : D) : {homo +%D^~ c : a b / a <= b }.
 Proof.
-move => a b /eqP H; apply /eqP.
+move => a b /eqP H; apply/eqP.
 by rewrite (adddC b) adddA -(adddA a) adddd -adddA (adddC c) adddA H.
 Qed.
 
 Lemma led_add2l (c : D) : {homo +%D c : a b / a <= b }.
-Proof. move=> a b. rewrite !(adddC c); apply led_add2r. Qed.
+Proof. move=> a b. rewrite !(adddC c); apply: led_add2r. Qed.
 
 Lemma led_add (a b c d : D) : a <= c -> b <= d -> (a + b) <= (c + d).
-Proof. by move => Hac Hbd; apply (led_trans (led_add2r _ Hac)), led_add2l. Qed.
+Proof. by move => Hac Hbd; apply/(led_trans (led_add2r _ Hac)) /led_add2l. Qed.
 
 Lemma led_mul2l (c : D): {homo *%D c : a b / a <= b }.
 Proof. by move => a b /eqP Hb; rewrite /led -muldDr Hb. Qed.
@@ -465,24 +465,24 @@ Lemma led_mul2r (c : D): {homo *%D^~ c : a b / a <= b }.
 Proof. by move=> a b /eqP Hb; rewrite /led -muldDl Hb. Qed.
 
 Lemma led_mul (a b c d : D) : a <= c -> b <= d -> (a * b) <= (c * d).
-Proof. by move => Hac Hbd; apply (led_trans (led_mul2r _ Hac)), led_mul2l. Qed.
+Proof. by move => Hac Hbd; apply/(led_trans (led_mul2r _ Hac)) /led_mul2l. Qed.
 
 Lemma led_addl (a b : D) : a <= b + a.
-Proof. by apply /eqP; rewrite adddC -adddA adddd. Qed.
+Proof. by apply/eqP; rewrite adddC -adddA adddd. Qed.
 
 Lemma led_addr (a b : D) : a <= a + b.
-Proof. by apply /eqP; rewrite adddA adddd. Qed.
+Proof. by apply/eqP; rewrite adddA adddd. Qed.
 
 Lemma led_add_eqv (a b c : D) :  b + c <= a <-> (b <= a /\ c <= a).
 Proof.
 split.
-{ move=>Ha.
-  split; [by apply: (led_trans _ Ha); apply /eqP; rewrite adddA adddd|].
-  by apply: (led_trans _ Ha); apply /eqP ; rewrite -adddC -(adddA b) adddd.
-}
-move=>[/eqP Hb /eqP Hc].
-rewrite -Hb -Hc; apply /eqP.
-by rewrite (adddC b) adddA -(adddA c) adddd (adddC c) adddA -(adddA b) adddd adddA.
+- move=>Ha; split.
+  + by apply/(led_trans _ Ha) /eqP; rewrite adddA adddd.
+  + by apply/(led_trans _ Ha) /eqP; rewrite -adddC -(adddA b) adddd.
+- move=> [/eqP Hb /eqP Hc].
+  rewrite -Hb -Hc; apply/eqP.
+  rewrite (adddC b) adddA -(adddA c) adddd (adddC c) adddA -(adddA b).
+  by rewrite adddd adddA.
 Qed.
 
 End DioidTheory.
@@ -623,57 +623,56 @@ Proof. by case C => [? [? []]]. Qed.
 
 Lemma set_add_unique lub' B : @is_lub C B (lub' B) -> lub' B = sup{B}.
 Proof.
-move=> Hlub'; apply /led_antisym /andP; split.
-{ by apply Hlub' => ? ?; apply set_add_is_lub. }
-by apply set_add_is_lub => ? ?; apply Hlub'.
+move=> Hlub'; apply/led_antisym /andP; split.
+- by apply Hlub' => ? ?; apply set_add_is_lub.
+- by apply set_add_is_lub => ? ?; apply Hlub'.
 Qed.
 
 Lemma set_add_empty : sup{fun=> False} = (eps C).
 Proof.
-by apply /led_antisym /andP; split; [apply set_add_is_lub|apply /eqP /add0d].
+by apply/led_antisym /andP; split; [apply set_add_is_lub|apply/eqP /add0d].
 Qed.
 
 Lemma set_add_rem a (B : C -> Prop) : sup{fun x => x = a \/ B x} = a + sup{B}.
 Proof.
-apply /led_antisym /andP; split.
-{ apply set_add_is_lub => x [->|Hx]; [by apply led_addr|].
-  by refine (led_trans _ (led_addl _ _)); apply set_add_is_lub. }
-rewrite led_add_eqv; split; [by apply set_add_is_lub; left|].
-by apply (proj2 (set_add_is_lub B)) => ? ?; apply set_add_is_lub; right.
+apply/led_antisym /andP; split.
+- apply set_add_is_lub => x [-> | Hx]; first exact: led_addr.
+  by refine (led_trans _ (led_addl _ _)); apply set_add_is_lub.
+- rewrite led_add_eqv; split; first by apply set_add_is_lub; left.
+  by apply/(proj2 (set_add_is_lub B)) => ? ?; apply set_add_is_lub; right.
 Qed.
 
 Lemma set_add_eq (B B' : C -> Prop) :
   (forall x, B x <-> B' x) -> set_add B = set_add B'.
 Proof.
-by move=> H; apply /led_antisym /andP; split;
-apply (proj2 (set_add_is_lub _)) => x Hx; apply set_add_is_lub, H.
+by move=> H; apply/led_antisym /andP; split;
+  apply/(proj2 (set_add_is_lub _)) => x Hx; apply set_add_is_lub, H.
 Qed.
 
 Lemma set_add_singleton (a : C) : sup{fun x => x = a} = a.
 Proof.
 rewrite (set_add_eq (B':=fun x => x = a \/ False)).
-{ by rewrite set_add_rem set_add_empty addd0. }
-by move=> x; split=> [->|[]]; [left| |].
+- by rewrite set_add_rem set_add_empty addd0.
+- by move=> x; split=> [-> | []]; [left| |].
 Qed.
 
 Lemma set_addDl (a : C) (B : C -> Prop) :
   a * sup{B} = sup{fun y => exists x, B x /\ y = a * x}.
-Proof. by move : B a; case C => [? [? []]]. Qed.
+Proof. by move: B a; case C => [? [? []]]. Qed.
 
 Lemma set_addDr (a : C) (B : C -> Prop) :
   sup{B} * a = sup{fun y => exists x, B x /\ y = x * a}.
-Proof. by move : B a; case C => [? [?[]]]. Qed.
+Proof. by move: B a; case C => [? [?[]]]. Qed.
 
 Lemma set_add_0 (F : nat -> C) :
   sup{fun y=> exists i : nat, (i <= 0)%N /\ y = F i} = F 0%N.
 Proof.
 rewrite -(addd0 (F 0%N)) /=.
 rewrite -set_add_empty => //=.
-rewrite -set_add_rem; apply set_add_eq => x; split.
-{ move=> [i [Hi Hi']].
+rewrite -set_add_rem; apply: set_add_eq => x; split.
+- move=> [i [Hi Hi']].
   by left; move : Hi Hi'; case i.
-}
-move=> [Hx | Fa]; by exists 0%N.
+- by move=> [Hx | Fa]; exists 0%N.
 Qed.
 
 Lemma set_add_S (F : nat -> C) k :
@@ -681,49 +680,45 @@ Lemma set_add_S (F : nat -> C) k :
     sup{fun y => exists i, (i <= k)%N /\ y = F i} + F k.+1.
 Proof.
 rewrite adddC -set_add_rem.
-apply set_add_eq => x. split.
-{ move=> [i [Hi ->]]; move: Hi.
+apply: set_add_eq => x; split.
+- move=> [i [Hi ->]]; move: Hi.
   by rewrite leq_eqVlt => /orP [/eqP ->|Hi]; [left|right; exists i].
-}
-move=> [Hx | [i [Hi Hi']]]; [by exists k.+1| exists i].
-split => //=.
-by apply leqW.
+- move=> [Hx | [i [Hi Hi']]]; first by exists k.+1.
+  by exists i; split=> [ | //]; apply: leqW.
 Qed.
 
 Lemma led_set_add (B : C -> Prop) x : B x -> x <= sup{B}.
 Proof.
-move=> Bx; apply /eqP; rewrite -set_add_rem.
-by apply set_add_eq => y; split; [move=>[->|]| move=>By; right].
+move=> Bx; apply/eqP; rewrite -set_add_rem.
+by apply: set_add_eq => y; split; [move=>[->|]| move=> ?; right].
 Qed.
 
 Lemma set_add_led (F : nat -> C) k :
   sup{fun y => exists i, (i<=k)%N /\ y = F i}<=
   sup{fun y => exists i, y = F i}.
 Proof.
-elim: k => /= [| k /eqP Ihk].
-{ rewrite set_add_0 /led -set_add_rem.
-  apply /eqP /set_add_eq => x; split .
-  { by move=> [-> | //]; exists 0%N. }
+elim: k => /= [ | k /eqP Ihk].
+- rewrite set_add_0 /led -set_add_rem.
+  apply/eqP /set_add_eq => x; split.
+  + by move=> [-> | //]; exists 0%N.
+  + by move=> ?; right.
+- rewrite set_add_S /le; apply/eqP.
+  rewrite (adddC _ (F k.+1)) -adddA Ihk -set_add_rem.
+  apply: set_add_eq => x; split; first by move=> [-> | //]; exists k.+1.
   by move => ?; right.
-}
-rewrite set_add_S /le ; apply /eqP.
-rewrite (adddC _ (F k.+1)) -adddA Ihk -set_add_rem.
-apply set_add_eq => x; split; [by move=> [-> | //]; exists k.+1|].
-by move => ?; right.
 Qed.
 
 Lemma set_add_lim_nat (F : nat -> C) l:
   (forall k, sup{fun y => exists i, (i <= k)%N /\ y = F i} <= l) ->
   sup{fun y => exists i, y = F i} <= l.
 Proof.
-move=> H. apply set_add_is_lub => _ [i ->].
-move: (H i).
-apply led_trans.
-rewrite (set_add_eq _ (B':= fun y => y= F i \/ (exists j, (j<=i)%N /\ y = F j)));
-  [by rewrite set_add_rem; apply led_addr|].
+move=> H; apply set_add_is_lub => _ [i ->]; move: (H i).
+apply: led_trans.
+set B' := fun y => y= F i \/ (exists j, (j<=i)%N /\ y = F j).
+rewrite (set_add_eq _ (B':=B')); first by rewrite set_add_rem; apply: led_addr.
 move=> x; split.
-{ by move=>[j [Hj ->]]; right; exists j. }
-by move=> [->|//]; exists i.
+- by move=>[j [Hj ->]]; right; exists j.
+- by move=> [-> | //]; exists i.
 Qed.
 
 Lemma set_add_led_set (F F' : nat -> C):
@@ -732,8 +727,8 @@ Lemma set_add_led_set (F F' : nat -> C):
   sup{fun x => exists i, x = F i} <=
   sup{fun x => exists i, x = F' i}.
 Proof.
-move=> Hyp; apply set_add_lim_nat => k.
-apply (led_trans (Hyp k)), set_add_led.
+move=> Hyp; apply: set_add_lim_nat => k.
+apply/(led_trans (Hyp k)) /set_add_led.
 Qed.
 
 Lemma set_add_eq_set (F F' : nat -> C):
@@ -741,8 +736,8 @@ Lemma set_add_eq_set (F F' : nat -> C):
              = sup{fun x => exists i, (i<= k)%N /\ x = F' i}) ->
   sup{fun x => exists i, x = F i} = sup{fun x => exists i, x = F' i}.
 Proof.
-move=> Hyp; apply /led_antisym /andP; split;
-apply set_add_led_set => k; rewrite Hyp; apply led_reflexive.
+move=> Hyp; apply/led_antisym /andP; split;
+  apply: set_add_led_set => k; rewrite Hyp; apply: led_reflexive.
 Qed.
 
 Definition set_add_lim B := proj2 (set_add_is_lub B).
@@ -750,17 +745,15 @@ Definition set_add_lim B := proj2 (set_add_is_lub B).
 Lemma set_add_subset (B B' : C -> Prop) :
   (forall x, B x -> B' x) -> sup{B} <= sup{B'}.
 Proof.
-move => H.
-apply set_add_lim => y Hy.
-apply led_set_add.
-by apply H.
+move => H; apply: set_add_lim => y Hy.
+by apply/led_set_add /H.
 Qed.
 
 Definition top : C := sup{ fun _ : C => True }.
 
 Lemma add_dtop : right_zero top (add C).
 Proof.
-by move=> x; rewrite -set_add_rem; apply set_add_eq => y; split=> _; [|right].
+by move=> x; rewrite -set_add_rem; apply: set_add_eq => y; split=> _; [|right].
 Qed.
 
 Lemma add_topd : left_zero top (add C).
@@ -868,10 +861,9 @@ Structure completedioid C S :=
 
 Section Subtyping.
 
-Ltac done := case=> *; assumption.
-Fact semiring_mulr R S : @semiring R S -> muld_closed S. Proof. by []. Qed.
+Fact semiring_mulr R S : @semiring R S -> muld_closed S. Proof. by case=> *. Qed.
 Fact completedioid_set_addd_closed R S : @completedioid R S -> set_addd_closed S.
-Proof. by []. Qed.
+Proof. by case=> *. Qed.
 
 Definition semiring_mul R S (ringS : @semiring R S) :=
   Mul (add_key (semiring_add ringS)) (semiring_mulr ringS).
@@ -901,7 +893,7 @@ Lemma set_add_ext (R : completeDioidType) S k (kS : @keyed_pred R S k) :
   set_addd_closed kS -> set_addd_closed S.
 Proof.
 move=> set_addS ? HB; rewrite -!(keyed_predE kS).
-by apply set_addS => ? ?; rewrite keyed_predE; apply HB.
+by apply: set_addS => ? ?; rewrite keyed_predE; apply: HB.
 Qed.
 
 End Extensionality.
@@ -992,7 +984,7 @@ Variables (mulS : mulPred S) (kS : keyed_pred mulS).
 
 Lemma rpred1M : muld_closed kS.
 Proof.
-by split=> [|x y]; rewrite !keyed_predE; case: mulS => _ [_] //; apply.
+by split=> [ | x y]; rewrite !keyed_predE; case: mulS => _ [_] //; apply.
 Qed.
 
 Lemma rpred1 : (e V) \in kS.
@@ -1017,7 +1009,7 @@ Lemma rpredS :
   forall (B : C -> Prop), (forall x, B x -> x \in kS) -> @set_add C B \in kS.
 Proof.
 move=> B HB; rewrite !keyed_predE.
-move: set_addS kS => [k S' kS']; apply (S' B) => x Hx.
+move: set_addS kS => [k S' kS']; apply: (S' B) => x Hx.
 by move: (HB x); rewrite !keyed_predE; apply.
 Qed.
 
@@ -1040,37 +1032,37 @@ Let addU (u1 u2 : U) := inU (rpredD (valP u1) (valP u2)).
 Let mulU (u1 u2 : U) := inU (rpredM (valP u1) (valP u2)).
 
 Fact adddA : associative addU.
-Proof. by move=> a b c; apply val_inj; rewrite !SubK adddA. Qed.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK adddA. Qed.
 
 Fact add0d : left_id zeroU addU.
-Proof. by move=> a; apply val_inj; rewrite !SubK add0d. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK add0d. Qed.
 
 Fact addd0 : right_id zeroU addU.
-Proof. by move=> a; apply val_inj; rewrite !SubK addd0. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK addd0. Qed.
 
 Fact adddC : commutative addU.
-Proof. by move=> a b; apply val_inj; rewrite !SubK adddC. Qed.
+Proof. by move=> a b; apply: val_inj; rewrite !SubK adddC. Qed.
 
 Fact muldA : associative mulU.
-Proof. by move=> a b c; apply val_inj; rewrite !SubK muldA. Qed.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldA. Qed.
 
 Fact mul1d : left_id oneU mulU.
-Proof. by move=> a; apply val_inj; rewrite !SubK mul1d. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK mul1d. Qed.
 
 Fact muld1 : right_id oneU mulU.
-Proof. by move=> a; apply val_inj; rewrite !SubK muld1. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK muld1. Qed.
 
 Fact muldDl : @left_distributive U U mulU addU.
-Proof. by move=> a b c; apply val_inj; rewrite !SubK muldDl. Qed.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldDl. Qed.
 
 Fact muldDr : right_distributive mulU addU.
-Proof. by move=> a b c; apply val_inj; rewrite !SubK muldDr. Qed.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldDr. Qed.
 
 Lemma mul0d : left_zero zeroU mulU.
-Proof. by move=> a; apply val_inj; rewrite !SubK mul0d. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK mul0d. Qed.
 
 Lemma muld0 : right_zero zeroU mulU.
-Proof. by move=> a; apply val_inj; rewrite !SubK muld0. Qed.
+Proof. by move=> a; apply: val_inj; rewrite !SubK muld0. Qed.
 
 Definition semiRingMixin of phant U :=
   let addLaw := @Monoid.ComLaw U zeroU (Monoid.Law adddA add0d addd0) adddC in
@@ -1114,75 +1106,72 @@ Hypothesis valM : {morph (val : U' -> C) : x y / x * y}.
 
 Fact set_add_empty : set_addU' (fun=> False) = eps U'.
 Proof.
-apply val_inj; rewrite !SubK.
+apply: val_inj; rewrite !SubK.
 rewrite (set_add_eq (B':=fun=>False)) ?set_add_empty ?val0 // => x.
-by split=> [[]|].
+by split=> [[] | ].
 Qed.
 
 Fact set_add_rem (a : U') B : set_addU' (fun x => x = a \/ B x) = a + (set_addU' B).
 Proof.
-apply val_inj; rewrite !SubK valA SubK -set_add_rem.
-apply set_add_eq => x; split.
-{ by move=> [Hx [<-|H]]; [left; rewrite insubdK|right]. }
-by move=> [->|[H H']]; split; [apply valP|left; rewrite valKd| |right].
+apply: val_inj; rewrite !SubK valA SubK -set_add_rem.
+apply: set_add_eq => x; split.
+- by move=> [Hx [<-|H]]; [left; rewrite insubdK|right].
+- by move=> [->|[H H']]; split; [apply: valP|left; rewrite valKd| |right].
 Qed.
 
 Fact set_add_eq B B' : (forall x, B x <-> B' x) -> set_addU' B = set_addU' B'.
 Proof.
-move => H.
-apply val_inj; rewrite !SubK.
-apply set_add_eq => x.
-by split; move=> [H' H'']; split=> [//|]; [rewrite -H| rewrite H].
+move=> H; apply: val_inj; rewrite !SubK.
+apply: set_add_eq => x.
+by split; move=> [H' H'']; split=> [// | ]; [rewrite -H|rewrite H].
 Qed.
 
 Fact set_add_lim (B : U' -> Prop) (l : U') :
   (forall x, B x -> x <= l) -> (set_addU' B) <= l.
 Proof.
-move=> H; apply /eqP /val_inj; rewrite valA !SubK.
-apply /eqP /set_add_lim => x [H' H'']; apply /eqP.
-rewrite -(SubK U H') -valA; apply /f_equal /eqP /H.
+move=> H; apply/eqP /val_inj; rewrite valA !SubK.
+apply/eqP /set_add_lim => x [H' H'']; apply/eqP.
+rewrite -(SubK U H') -valA; apply/f_equal /eqP /H.
 by move: H''; rewrite /insubd insubT.
 Qed.
 
 Fact set_addDl (a : U') B :
   a * (set_addU' B) = set_addU' (fun y => exists x, B x /\ y = a * x).
 Proof.
-apply val_inj; rewrite valM !SubK set_addDl.
-apply GDioid.set_add_eq => x; split.
-{ move=> [y [[Hy Hy'] ->]].
-  split; [by rewrite -(SubK U Hy) -valM; apply valP|].
-  exists (insubd (eps U') y); split=> [//|].
-  apply val_inj; rewrite valM insubdK ?insubdK //.
-  by rewrite -(SubK U Hy) -valM; apply valP. }
-move=> [Hx [y [Hy Hy']]].
-exists (val y); split; [split|]; [by apply valP|by rewrite valKd|].
-by move: Hy'; rewrite -(SubK U Hx) valKd => ->; rewrite valM.
+apply: val_inj; rewrite valM !SubK set_addDl.
+apply: GDioid.set_add_eq => x; split.
+- move=> [y [[Hy Hy'] ->]].
+  split; first by rewrite -(SubK U Hy) -valM; apply: valP.
+  exists (insubd (eps U') y); split=> [// | ].
+  apply: val_inj; rewrite valM insubdK ?insubdK //.
+  by rewrite -(SubK U Hy) -valM; apply: valP.
+- move=> [Hx [y [Hy Hy']]].
+  exists (val y); split; [split|]; [exact: valP|by rewrite valKd|].
+  by move: Hy'; rewrite -(SubK U Hx) valKd => ->; rewrite valM.
 Qed.
 
 Fact set_addDr a B :
   (set_addU' B) * a = set_addU' (fun y => exists x, B x /\ y = x * a).
 Proof.
-apply val_inj; rewrite valM !SubK set_addDr.
-apply GDioid.set_add_eq => x; split.
-{ move=> [y [[Hy Hy'] ->]].
-  split; [by rewrite -(SubK U Hy) -valM; apply valP|].
-  exists (insubd (eps U') y); split=> [//|].
-  apply val_inj; rewrite valM insubdK ?insubdK //.
-  by rewrite -(SubK U Hy) -valM; apply valP. }
-move=> [Hx [y [Hy Hy']]].
-exists (val y); split; [split|]; [by apply valP|by rewrite valKd|].
-by move: Hy'; rewrite -(SubK U Hx) valKd => ->; rewrite valM.
+apply: val_inj; rewrite valM !SubK set_addDr.
+apply: GDioid.set_add_eq => x; split.
+- move=> [y [[Hy Hy'] ->]].
+  split; first by rewrite -(SubK U Hy) -valM; apply: valP.
+  exists (insubd (eps U') y); split=> [// | ].
+  apply: val_inj; rewrite valM insubdK ?insubdK //.
+  by rewrite -(SubK U Hy) -valM; apply: valP.
+- move=> [Hx [y [Hy Hy']]].
+  exists (val y); split; [split|]; [exact: valP|by rewrite valKd|].
+  by move: Hy'; rewrite -(SubK U Hx) valKd => ->; rewrite valM.
 Qed.
 
 Fact is_lubU : forall B : U' -> Prop, is_lub B (set_addU' B).
 Proof.
 move=> B; split.
-{ move=> x Hx. apply /eqP.
-  rewrite -set_add_rem. apply set_add_eq => y.
-  by split; [move=> [-> | H]| move=> hB; right].
-}
-move=> y. rewrite /is_upper_bound => Hy.
-by apply set_add_lim.
+- move=> x Hx; apply/eqP.
+  rewrite -set_add_rem; apply: set_add_eq => y.
+  by split; [move=> [-> | H]|move=> hB; right].
+- by move=> y; rewrite /is_upper_bound => Hy; apply: set_add_lim.
 Qed.
 
 Definition completeDioidMixin of phant U' :=
