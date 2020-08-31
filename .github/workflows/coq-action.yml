@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    # the OS must be GNU/Linux to be able to use the docker-coq-action
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - mathcomp/mathcomp:1.9.0-coq-8.9
+          - mathcomp/mathcomp:1.9.0-coq-8.10
+          - mathcomp/mathcomp:1.9.0-coq-8.11
+          - mathcomp/mathcomp:1.11.0-coq-8.12
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v2
+    - uses: coq-community/docker-coq-action@v1
+      with:
+        opam_file: 'coq-mathcomp-dioid.opam'
+        custom_image: ${{ matrix.image }}
+        custom_script: |
+          startGroup Print opam config
+            opam config list; opam repo list; opam list
+            echo NJOBS=${NJOBS}
+          endGroup
+          startGroup Update opam cache
+            opam update -y
+          endGroup
+          startGroup Build coq-mathcomp-dioid dependencies
+            opam pin add -n -y -k path coq-mathcomp-dioid .
+            opam remove coq-mathcomp-algebra coq-mathcomp-character coq-mathcomp-field coq-mathcomp-fingroup coq-mathcomp-solvable # coq-mathcomp-ssreflect is enough
+            opam install -y -j ${NJOBS} coq-mathcomp-dioid --deps-only
+            opam list
+          endGroup
+          startGroup Build coq-mathcomp-dioid
+            opam install -y -v -j ${NJOBS} coq-mathcomp-dioid
+            opam list
+          endGroup
+          startGroup Uninstallation test
+            opam remove -y coq-mathcomp-dioid
+          endGroup
+
+# See also:
+# https://github.com/coq-community/docker-coq-action#readme
+# https://github.com/erikmd/docker-coq-github-action-demo
