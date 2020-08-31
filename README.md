@@ -12,6 +12,16 @@ The main algebraic structures defined are:
 
 More details can be found in comments at the beginning of each file.
 
+Installation
+------------
+
+This is available as an OPAM (>= 2.0) package:
+
+```
+% opam repo add coq-released https://coq.inria.fr/opam/released
+% opam install coq-mathcomp-dioid
+```
+
 Dependencies
 ------------
 
