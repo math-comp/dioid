@@ -1,3 +1,5 @@
+[![CI](https://github.com/math-comp/dioid/workflows/CI/badge.svg?branch=master)](https://github.com/math-comp/dioid/actions?query=workflow%3ACI)
+
 Definitions of the algebraic structure of dioid following the style of
 ssralg in the Mathcomp library.
 
