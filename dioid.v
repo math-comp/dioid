@@ -1,4 +1,5 @@
-From mathcomp Require Import ssreflect ssrfun ssrbool eqtype choice ssrnat bigop.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype choice ssrnat.
+From mathcomp Require Import bigop.
 
 (******************************************************************************)
 (* The algebraic structures of semi-rings and dioids, as described in:        *)
@@ -555,8 +556,8 @@ Module CompleteDioid.
 Record mixin_of (D : dioidType): Type := Mixin {
   set_add : (D -> Prop) -> D;
   _ : forall B, is_lub B (set_add B);
-  _ : forall a B, a * (set_add B) = set_add (fun y => exists x, B x /\ y = a * x);
-  _ : forall a B, (set_add B) * a = set_add (fun y => exists x, B x /\ y = x * a)
+  _ : forall a B, a * set_add B = set_add (fun y => exists x, B x /\ y = a * x);
+  _ : forall a B, set_add B * a = set_add (fun y => exists x, B x /\ y = x * a)
 }.
 
 Section ClassDef.
@@ -601,7 +602,8 @@ Notation completeDioidType := type.
 Notation CompleteDioidType T m := (@pack T _ m _ _ id _ id).
 Notation CompleteDioidMixin := Mixin.
 Notation "[ 'completeDioidType' 'of' T 'for' cT ]" := (@clone T cT _ idfun)
-  (at level 0, format "[ 'completeDioidType'  'of'  T  'for'  cT ]") : form_scope.
+  (at level 0,
+   format "[ 'completeDioidType'  'of'  T  'for'  cT ]") : form_scope.
 Notation "[ 'completeDioidType' 'of' T ]" := (@clone T _ _ id)
   (at level 0, format "[ 'completeDioidType'  'of'  T ]") : form_scope.
 End Exports.
@@ -785,8 +787,9 @@ Module ComCompleteDioid.
 
 Section ClassDef.
 
-Record class_of D :=
-  Class {base : CompleteDioid.class_of D; mixin : commutative (SemiRing.mul base)}.
+Record class_of D := Class {
+  base : CompleteDioid.class_of D; mixin : commutative (SemiRing.mul base)
+}.
 Local Coercion base : class_of >-> CompleteDioid.class_of.
 Definition base2 D m := ComDioid.Class (@mixin D m).
 Local Coercion base2 : class_of >-> ComDioid.class_of.
@@ -811,7 +814,8 @@ Definition comSemiRingType := @ComSemiRing.Pack cT xclass.
 Definition comDioidType := @ComDioid.Pack cT xclass.
 Definition completeDioidType := @CompleteDioid.Pack cT xclass.
 Definition com_complete_dioidType := @ComDioid.Pack completeDioidType xclass.
-Definition com_semi_ring_complete_dioidType := @ComSemiRing.Pack completeDioidType xclass.
+Definition com_semi_ring_complete_dioidType :=
+  @ComSemiRing.Pack completeDioidType xclass.
 
 End ClassDef.
 
@@ -841,7 +845,8 @@ Canonical com_semi_ring_complete_dioidType.
 Notation comCompleteDioidType := type.
 Notation ComCompleteDioidType T m := (@pack T _ m _ _ id _ id).
 Notation "[ 'comCompleteDioidType' 'of' T 'for' cT ]" := (@clone T cT _ idfun)
-  (at level 0, format "[ 'comCompleteDioidType'  'of'  T  'for'  cT ]") : form_scope.
+  (at level 0,
+   format "[ 'comCompleteDioidType'  'of'  T  'for'  cT ]") : form_scope.
 Notation "[ 'comCompleteDioidType' 'of' T ]" := (@clone T _ _ id)
   (at level 0, format "[ 'comCompleteDioidType'  'of'  T ]") : form_scope.
 End Exports.
@@ -854,15 +859,20 @@ Module Pred.
 
 Structure add V S := Add {add_key : pred_key S; _ : @addd_closed V S}.
 Structure mul R S := Mul {mul_key : pred_key S; _ : @muld_closed R S}.
-Structure set_add C S := SetAdd {set_add_key : pred_key S; _ : @set_addd_closed C S}.
-Structure semiring R S := SemiRing { semiring_add : add S; _ : @muld_closed R S }.
+Structure set_add C S :=
+  SetAdd {set_add_key : pred_key S; _ : @set_addd_closed C S}.
+Structure semiring R S :=
+  SemiRing {semiring_add : add S; _ : @muld_closed R S}.
 Structure completedioid C S :=
-  CompleteDioid { completedioid_semiring : semiring S; _ : @set_addd_closed C S }.
+  CompleteDioid {completedioid_semiring : semiring S; _ : @set_addd_closed C S}.
 
 Section Subtyping.
 
-Fact semiring_mulr R S : @semiring R S -> muld_closed S. Proof. by case=> *. Qed.
-Fact completedioid_set_addd_closed R S : @completedioid R S -> set_addd_closed S.
+Fact semiring_mulr R S : @semiring R S -> muld_closed S.
+Proof. by case=> *. Qed.
+
+Fact completedioid_set_addd_closed R S :
+  @completedioid R S -> set_addd_closed S.
 Proof. by case=> *. Qed.
 
 Definition semiring_mul R S (ringS : @semiring R S) :=
@@ -1111,7 +1121,8 @@ rewrite (set_add_eq (B':=fun=>False)) ?set_add_empty ?val0 // => x.
 by split=> [[] | ].
 Qed.
 
-Fact set_add_rem (a : U') B : set_addU' (fun x => x = a \/ B x) = a + (set_addU' B).
+Fact set_add_rem (a : U') B :
+  set_addU' (fun x => x = a \/ B x) = a + set_addU' B.
 Proof.
 apply: val_inj; rewrite !SubK valA SubK -set_add_rem.
 apply: set_add_eq => x; split.
@@ -1202,12 +1213,14 @@ Notation "[ 'comDioidMixin' 'of' R 'by' <: ]" :=
   (at level 0, format "[ 'comDioidMixin' 'of' R 'by' <: ]") : form_scope.
 
 Notation "[ 'completeDioidMixin' 'of' R 'by' <: ]" :=
-  (@completeDioidMixin _ _ _ _ _ _ (@erefl Type R%type) (rrefl _) (rrefl _) (Phant R))
+  (@completeDioidMixin
+     _ _ _ _ _ _ (@erefl Type R%type) (rrefl _) (rrefl _) (Phant R))
 (at level 0, format "[ 'completeDioidMixin' 'of' R 'by' <: ]") : form_scope.
 
 Notation "[ 'comCompleteDioidMixin' 'of' R 'by' <: ]" :=
   (comCompleteDioidMixin (Phant R) val_inj (rrefl _))
-  (at level 0, format "[ 'comCompleteDioidMixin' 'of' R 'by' <: ]") : form_scope.
+  (at level 0,
+   format "[ 'comCompleteDioidMixin' 'of' R 'by' <: ]") : form_scope.
 
 End Exports.
 

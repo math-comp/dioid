@@ -37,7 +37,8 @@ Variable (D : completeDioidType).
 
 Definition exp D x n := iterop n (mul D) x (e D).
 Definition op_kleene D a := @set_add D (fun y => exists i, y = exp a i).
-Definition op_plus D a := @set_add D (fun y => exists i : nat, (0 < i)%nat /\ y = exp a i).
+Definition op_plus D a :=
+  @set_add D (fun y => exists i : nat, (0 < i)%nat /\ y = exp a i).
 Definition div (b a : D) : D := set_add (fun x => x * a <= b ).
 
 End operatorsDefinitions.
