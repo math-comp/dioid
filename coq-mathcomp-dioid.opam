@@ -38,7 +38,7 @@ tags: [
   "keyword:semi-ring"
   "keyword:complete dioid"
   "category:Miscellaneous/Coq Extensions"
-  "logpath:dioid"
+  "logpath:mathcomp.dioid"
 ]
 authors: [
   "Lucien Rakotomalala <lucien.rakotomalala@onera.fr>"

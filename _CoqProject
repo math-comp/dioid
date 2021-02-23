@@ -1,4 +1,4 @@
--R . dioid
+-R . mathcomp.dioid
 -arg "-w -notation-overriden,-parsing"
 dioid.v
 kleene.v
