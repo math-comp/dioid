@@ -25,14 +25,15 @@ This is available as an OPAM (>= 2.0) package:
 Dependencies
 ------------
 
-* Coq (>= 8.10)
-* The Mathcomp library (>= 1.9)
+* Coq (>= 8.13)
+* The Mathcomp library (>= 1.12.0)
+* Hierarchy Builder (>= 1.0.0)
 
 Dependencies can be installed with OPAM (>= 2.0) by typing:
 
 ```
 % opam repo add coq-released https://coq.inria.fr/opam/released
-% opam install coq-mathcomp-ssreflect
+% opam install coq-mathcomp-ssreflect.1.12.0 coq-hierarchy-builder.1.0.0
 ```
 
 Compilation
