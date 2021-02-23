@@ -52,13 +52,6 @@ HB.mixin Record SemiRing_of_TYPE R := {
 
 HB.structure Definition SemiRing := { R of SemiRing_of_TYPE R }.
 
-Notation "0" := zero : dioid_scope.
-Notation "1" := one : dioid_scope.
-Notation "+%D" := (@add _) : dioid_scope.
-Notation "*%D" := (@mul _) : dioid_scope.
-Infix "+" := (@add _) : dioid_scope.
-Infix "*" := (@mul _) : dioid_scope.
-
 Section SemiRingTheory.
 
 Variables R : SemiRing.type.
@@ -139,6 +132,13 @@ Implicit Type a b c : D.
 Canonical dioid_eqType := EqType D semiRing_eqMixin.
 Canonical dioid_choiceType := ChoiceType D semiRing_choiceMixin.
 
+Local Notation "0" := zero : dioid_scope.
+Local Notation "1" := one : dioid_scope.
+Local Notation "+%D" := (@add _) : dioid_scope.
+Local Notation "*%D" := (@mul _) : dioid_scope.
+Local Infix "+" := (@add _) : dioid_scope.
+Local Infix "*" := (@mul _) : dioid_scope.
+
 Definition le_dioid a b := a + b == b.
 
 Definition lt_dioid a b := (b != a) && le_dioid a b.
@@ -213,6 +213,13 @@ End DioidTheory.
 Coercion dioid_eqType : Dioid.type >-> eqType.
 Coercion dioid_choiceType : Dioid.type >-> choiceType.
 Coercion dioid_porderType : Dioid.type >-> porderType.
+
+Notation "0" := zero : dioid_scope.
+Notation "1" := one : dioid_scope.
+Notation "+%D" := (@add _) : dioid_scope.
+Notation "*%D" := (@mul _) : dioid_scope.
+Infix "+" := (@add _) : dioid_scope.
+Infix "*" := (@mul _) : dioid_scope.
 
 Notation led := (@Order.le dioid_display _) (only parsing).
 Notation "@ 'led' R" :=
