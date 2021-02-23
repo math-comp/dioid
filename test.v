@@ -68,29 +68,22 @@ Proof. by move=> [?||] //=; rewrite maxnn. Qed.
 Lemma mulenA : associative mulen.
 Proof. by move=> [?||] [?||] [?||] //=; rewrite addnA. Qed.
 
+Lemma mulenC : commutative mulen.
+Proof. by move=> [?||] [?||] //=; rewrite addnC. Qed.
+
 Lemma mul1en : left_id eone mulen.
 Proof. by case. Qed.
-
-Lemma mulen1 : right_id eone mulen.
-Proof. by move=> [?||] //=; rewrite addn0. Qed.
 
 Lemma mulenDl : left_distributive mulen adden.
 Proof. by move=> [?||] [?||] [?||] //=; rewrite addn_maxl. Qed.
 
-Lemma mulenDr : right_distributive mulen adden.
-Proof. by move=> [?||] [?||] [?||] //=; rewrite addn_maxr. Qed.
-
 Lemma mul0en : left_zero ezero mulen.
 Proof. by case. Qed.
 
-Lemma mulen0 : right_zero ezero mulen.
-Proof. by case. Qed.
-
 Definition enat_dioid_axioms :=
-  Dioid_of_TYPE.Build
+  ComDioid_of_TYPE.Build
     enat enat_eqMixin enat_choiceMixin
-    addenA addenC add0en addenen
-    mulenA mul1en mulen1 mulenDl mulenDr mul0en mulen0.
+    addenA addenC add0en addenen mulenA mulenC mul1en mulenDl mul0en.
 
 HB.instance enat enat_dioid_axioms.
 Fail Check @eq_op _ ezero ezero.

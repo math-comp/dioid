@@ -282,6 +282,92 @@ Coercion dioid_eqType : Dioid.type >-> eqType.
 Coercion dioid_choiceType : Dioid.type >-> choiceType.
 Coercion dioid_porderType : Dioid.type >-> porderType.
 
+HB.factory Record ComDioid_of_Dioid D of Dioid D := {
+  muldC : @commutative D _ mul;
+}.
+
+HB.builders Context D (a : ComDioid_of_Dioid D).
+
+  HB.instance Definition to_ComSemiRing_of_SemiRing :=
+    ComSemiRing_of_SemiRing.Build D muldC.
+
+HB.end.
+
+HB.factory Record ComDioid_of_ComSemiRing D of ComSemiRing D := {
+  adddd : @idempotent D add;
+}.
+
+HB.builders Context D (a : ComDioid_of_ComSemiRing D).
+
+  HB.instance Definition to_Dioid_of_ComSemiRing :=
+    Dioid_of_SemiRing.Build D adddd.
+
+  HB.instance Definition to_ComDioid_of_Dioid :=
+    ComDioid_of_Dioid.Build D muldC.
+
+HB.end.
+
+HB.factory Record ComDioid_of_SemiRing D of SemiRing D := {
+  adddd : @idempotent D add;
+  muldC : @commutative D _ mul;
+}.
+
+HB.builders Context D (a : ComDioid_of_SemiRing D).
+
+  HB.instance Definition to_Dioid_of_SemiRing :=
+    Dioid_of_SemiRing.Build D adddd.
+
+  HB.instance Definition to_ComDioid_of_Dioid :=
+    ComDioid_of_Dioid.Build D muldC.
+
+HB.end.
+
+HB.factory Record ComDioid_of_TYPE D := {
+  comdioid_eqMixin : Equality.mixin_of D;
+  comdioid_choiceMixin : Choice.mixin_of D;
+  zero : D;
+  one : D;
+  add : D -> D -> D;
+  mul : D -> D -> D;
+  adddA : associative add;
+  adddC : commutative add;
+  add0d : left_id zero add;
+  adddd : idempotent add;
+  muldA : associative mul;
+  muldC : commutative mul;
+  mul1d : left_id one mul;
+  muldDl : left_distributive mul add;
+  mul0d : left_zero zero mul;
+}.
+
+HB.builders Context D (a : ComDioid_of_TYPE D).
+
+  HB.instance Definition to_ComSemiRing_of_TYPE :=
+    ComSemiRing_of_TYPE.Build
+      D comdioid_eqMixin comdioid_choiceMixin
+      adddA adddC add0d muldA muldC mul1d muldDl mul0d.
+
+  HB.instance Definition to_ComDioid_of_ComSemiRing :=
+    ComDioid_of_ComSemiRing.Build D adddd.
+
+HB.end.
+
+HB.structure Definition ComDioid := { D of ComDioid_of_TYPE D }.
+
+Section ComDioidTheory.
+
+Variables D : ComDioid.type.
+
+Canonical comdioid_eqType := EqType D semiRing_eqMixin.
+Canonical comdioid_choiceType := ChoiceType D semiRing_choiceMixin.
+Canonical comdioid_porderType :=
+  POrderType dioid_display D (dioid_porderMixin D).
+
+End ComDioidTheory.
+Coercion comdioid_eqType : ComDioid.type >-> eqType.
+Coercion comdioid_choiceType : ComDioid.type >-> choiceType.
+Coercion comdioid_porderType : ComDioid.type >-> porderType.
+
 Notation "0" := zero : dioid_scope.
 Notation "1" := one : dioid_scope.
 Notation "+%D" := (@add _) : dioid_scope.
