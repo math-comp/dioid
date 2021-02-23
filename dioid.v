@@ -84,6 +84,74 @@ End SemiRingTheory.
 Coercion semiRing_eqType : SemiRing.type >-> eqType.
 Coercion semiRing_choiceType : SemiRing.type >-> choiceType.
 
+HB.mixin Record ComSemiRing_of_SemiRing R of SemiRing R := {
+  muldC : @commutative R _ mul;
+}.
+
+HB.factory Record ComSemiRing_of_TYPE R := {
+  dioid_eqMixin : Equality.mixin_of R;
+  dioid_choiceMixin : Choice.mixin_of R;
+  zero : R;
+  one : R;
+  add : R -> R -> R;
+  mul : R -> R -> R;
+  adddA : associative add;
+  adddC : commutative add;
+  add0d : left_id zero add;
+  muldA : associative mul;
+  muldC : commutative mul;
+  mul1d : left_id one mul;
+  muldDl : left_distributive mul add;
+  mul0d : left_zero zero mul;
+}.
+
+HB.builders Context R (a : ComSemiRing_of_TYPE R).
+
+  Lemma muld1 : right_id one mul.
+  Proof. by move=> x; rewrite muldC mul1d. Qed.
+
+  Lemma muldDr : right_distributive mul add.
+  Proof. by move=> x y z; rewrite muldC muldDl !(muldC x). Qed.
+
+  Lemma muld0 : right_zero zero mul.
+  Proof. by move=> x; rewrite muldC mul0d. Qed.
+
+  HB.instance Definition to_SemiRing_of_TYPE :=
+    SemiRing_of_TYPE.Build
+      R dioid_eqMixin dioid_choiceMixin
+      adddA adddC add0d
+      muldA mul1d muld1 muldDl muldDr mul0d muld0.
+
+  HB.instance Definition to_ComSemiRing_of_SemiRing :=
+    ComSemiRing_of_SemiRing.Build R muldC.
+
+HB.end.
+
+HB.structure Definition ComSemiRing := { R of ComSemiRing_of_TYPE R }.
+
+Section ComSemiRingTheory.
+
+Variables R : ComSemiRing.type.
+
+Canonical comSemiRing_eqType := EqType R semiRing_eqMixin.
+Canonical comSemiRing_choiceType := ChoiceType R semiRing_choiceMixin.
+
+Local Notation "*%D" := (@mul _) : dioid_scope.
+Local Infix "*" := (@mul _) : dioid_scope.
+
+Lemma muldAC : right_commutative (S := R) *%D.
+Proof. by move=> x y z; rewrite -muldA (muldC y) muldA. Qed.
+
+Lemma muldCA : left_commutative (S := R) *%D.
+Proof. by move=> x y z; rewrite muldC -muldA (muldC x). Qed.
+
+Lemma muldACA : interchange (S := R) *%D *%D.
+Proof. by move=> a b c d; rewrite muldAC muldA -muldA (muldC d). Qed.
+
+End ComSemiRingTheory.
+Coercion comSemiRing_eqType : ComSemiRing.type >-> eqType.
+Coercion comSemiRing_choiceType : ComSemiRing.type >-> choiceType.
+
 HB.mixin Record Dioid_of_SemiRing R of SemiRing R := {
   adddd : @idempotent R add;
 }.
