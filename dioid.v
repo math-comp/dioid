@@ -1,25 +1,14 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype choice order.
 From mathcomp Require Import ssrnat bigop.
+Require Import HB_wrappers.
 
-(** To declare an instance of SemiRing on R:
+(** After declaring an instance of [(Com)Dioid] on [T] using
+  [(Com)Dioid_of_WrapChoice.Build] the new [porderType] instance must
+  be made canonical by hand:
   <<
-  From HB Require Import structures.
-
-  Definition R_semiring_axioms :=
-    SemiRing_of_TYPE.Build
-      R R_eqMixin R_choiceMixin
-      addA addC add0r addenen mulA mul1r mulr1 mulDl mulDr mul0r mulr0.
-
-  HB.instance R R_semiring_axioms.
-  Canonical R_eqType := [eqType of R for R_is_a_SemiRing].
-  Canonical R_choiceType := [choiceType of R for R_is_a_SemiRing].
-  >>
-  Similarly, after declaring an instance of Dioid:
-  <<
-  Canonical R_porderType := [porderType of R for R_is_a_Dioid].
-  >>
-*)
+  Canonical T_porderType := [porderType of T for T_is_a_WrapPOrder].
+  >> *)
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -31,9 +20,7 @@ Local Open Scope dioid_scope.
 
 Import Order.Theory.
 
-HB.mixin Record SemiRing_of_TYPE R := {
-  semiRing_eqMixin : Equality.mixin_of R;
-  semiRing_choiceMixin : Choice.mixin_of R;
+HB.mixin Record SemiRing_of_WrapChoice R of WrapChoice R := {
   zero : R;
   one : R;
   add : R -> R -> R;
@@ -50,14 +37,19 @@ HB.mixin Record SemiRing_of_TYPE R := {
   muld0 : right_zero zero mul;
 }.
 
-HB.structure Definition SemiRing := { R of SemiRing_of_TYPE R }.
+HB.structure Definition SemiRing :=
+  { R of WrapChoice R & SemiRing_of_WrapChoice R }.
+
+Coercion SemiRing_to_Equality (T : SemiRing.type) :=
+  Eval hnf in [eqType of T for T].
+Canonical SemiRing_to_Equality.
+Coercion SemiRing_to_Choice (T : SemiRing.type) :=
+  Eval hnf in [choiceType of T for T].
+Canonical SemiRing_to_Choice.
 
 Section SemiRingTheory.
 
 Variables R : SemiRing.type.
-
-Canonical semiRing_eqType := EqType R semiRing_eqMixin.
-Canonical semiRing_choiceType := ChoiceType R semiRing_choiceMixin.
 
 Lemma addd0 : right_id (@zero R) add.
 Proof. by move=> x; rewrite adddC add0d. Qed.
@@ -81,16 +73,12 @@ Lemma adddACA : interchange (S := R) +%D +%D.
 Proof. by move=> a b c d; rewrite adddAC adddA -adddA (adddC d). Qed.
 
 End SemiRingTheory.
-Coercion semiRing_eqType : SemiRing.type >-> eqType.
-Coercion semiRing_choiceType : SemiRing.type >-> choiceType.
 
 HB.mixin Record ComSemiRing_of_SemiRing R of SemiRing R := {
   muldC : @commutative R _ mul;
 }.
 
-HB.factory Record ComSemiRing_of_TYPE R := {
-  dioid_eqMixin : Equality.mixin_of R;
-  dioid_choiceMixin : Choice.mixin_of R;
+HB.factory Record ComSemiRing_of_WrapChoice R of WrapChoice R := {
   zero : R;
   one : R;
   add : R -> R -> R;
@@ -105,7 +93,7 @@ HB.factory Record ComSemiRing_of_TYPE R := {
   mul0d : left_zero zero mul;
 }.
 
-HB.builders Context R (a : ComSemiRing_of_TYPE R).
+HB.builders Context R (f : ComSemiRing_of_WrapChoice R).
 
   Lemma muld1 : right_id one mul.
   Proof. by move=> x; rewrite muldC mul1d. Qed.
@@ -116,10 +104,9 @@ HB.builders Context R (a : ComSemiRing_of_TYPE R).
   Lemma muld0 : right_zero zero mul.
   Proof. by move=> x; rewrite muldC mul0d. Qed.
 
-  HB.instance Definition to_SemiRing_of_TYPE :=
-    SemiRing_of_TYPE.Build
-      R dioid_eqMixin dioid_choiceMixin
-      adddA adddC add0d
+  HB.instance Definition to_SemiRing_of_WrapChoice :=
+    SemiRing_of_WrapChoice.Build
+      R adddA adddC add0d
       muldA mul1d muld1 muldDl muldDr mul0d muld0.
 
   HB.instance Definition to_ComSemiRing_of_SemiRing :=
@@ -127,14 +114,19 @@ HB.builders Context R (a : ComSemiRing_of_TYPE R).
 
 HB.end.
 
-HB.structure Definition ComSemiRing := { R of ComSemiRing_of_TYPE R }.
+HB.structure Definition ComSemiRing :=
+  { R of WrapChoice R & ComSemiRing_of_WrapChoice R }.
+
+Coercion ComSemiRing_to_Equality (T : ComSemiRing.type) :=
+  Eval hnf in [eqType of T for T].
+Canonical ComSemiRing_to_Equality.
+Coercion ComSemiRing_to_Choice (T : ComSemiRing.type) :=
+  Eval hnf in [choiceType of T for T].
+Canonical ComSemiRing_to_Choice.
 
 Section ComSemiRingTheory.
 
 Variables R : ComSemiRing.type.
-
-Canonical comSemiRing_eqType := EqType R semiRing_eqMixin.
-Canonical comSemiRing_choiceType := ChoiceType R semiRing_choiceMixin.
 
 Local Notation "*%D" := (@mul _) : dioid_scope.
 Local Infix "*" := (@mul _) : dioid_scope.
@@ -149,16 +141,49 @@ Lemma muldACA : interchange (S := R) *%D *%D.
 Proof. by move=> a b c d; rewrite muldAC muldA -muldA (muldC d). Qed.
 
 End ComSemiRingTheory.
-Coercion comSemiRing_eqType : ComSemiRing.type >-> eqType.
-Coercion comSemiRing_choiceType : ComSemiRing.type >-> choiceType.
 
-HB.mixin Record Dioid_of_SemiRing R of SemiRing R := {
-  adddd : @idempotent R add;
+HB.mixin Record Dioid_of_SemiRing_and_WrapPOrder D
+         of SemiRing D & WrapPOrder D := {
+  adddd : @idempotent D add;
+  le_def : forall (a b : D),
+      (Order.POrder.le wrap_porderMixin a b)
+      = (Equality.op wrap_eqMixin (add a b) b);
 }.
 
-HB.factory Record Dioid_of_TYPE D := {
-  dioid_eqMixin : Equality.mixin_of D;
-  dioid_choiceMixin : Choice.mixin_of D;
+HB.factory Record Dioid_of_WrapPOrder D of WrapPOrder D := {
+  zero : D;
+  one : D;
+  add : D -> D -> D;
+  mul : D -> D -> D;
+  adddA : associative add;
+  adddC : commutative add;
+  add0d : left_id zero add;
+  adddd : idempotent add;
+  muldA : associative mul;
+  mul1d : left_id one mul;
+  muld1 : right_id one mul;
+  muldDl : left_distributive mul add;
+  muldDr : right_distributive mul add;
+  mul0d : left_zero zero mul;
+  muld0 : right_zero zero mul;
+  le_def : forall (a b : D),
+      (Order.POrder.le wrap_porderMixin a b)
+      = (Equality.op wrap_eqMixin (add a b) b);
+}.
+
+HB.builders Context D (f : Dioid_of_WrapPOrder D).
+
+  HB.instance Definition to_SemiRing_of_WrapChoice :=
+    SemiRing_of_WrapChoice.Build
+      D adddA adddC add0d
+      muldA mul1d muld1 muldDl muldDr mul0d muld0.
+
+  HB.instance Definition to_Dioid_of_SemiRing_and_WrapPOrder :=
+    Dioid_of_SemiRing_and_WrapPOrder.Build D adddd le_def.
+
+HB.end.
+
+HB.factory Record Dioid_of_WrapChoice D of WrapChoice D := {
   zero : D;
   one : D;
   add : D -> D -> D;
@@ -176,20 +201,64 @@ HB.factory Record Dioid_of_TYPE D := {
   muld0 : right_zero zero mul;
 }.
 
-HB.builders Context D (a : Dioid_of_TYPE D).
+HB.builders Context D (f : Dioid_of_WrapChoice D).
 
-  HB.instance Definition to_SemiRing_of_TYPE :=
-    SemiRing_of_TYPE.Build
-      D dioid_eqMixin dioid_choiceMixin
-      adddA adddC add0d
+  HB.instance Definition to_SemiRing_of_WrapChoice :=
+    SemiRing_of_WrapChoice.Build
+      D adddA adddC add0d
       muldA mul1d muld1 muldDl muldDr mul0d muld0.
 
-  HB.instance Definition to_Dioid_of_SemiRing :=
-    Dioid_of_SemiRing.Build D adddd.
+  Canonical D_is_a_eqType := [eqType of D for D_is_a_WrapChoice].
+
+  Definition le_dioid a b := add a b == b.
+
+  Definition lt_dioid a b := (b != a) && le_dioid a b.
+
+  Lemma lt_def_dioid a b : lt_dioid a b = (b != a) && le_dioid a b.
+  Proof. by []. Qed.
+
+  Lemma le_refl_dioid : reflexive le_dioid.
+  Proof. by move=> a; rewrite /le_dioid adddd. Qed.
+
+  Lemma le_anti_dioid : antisymmetric le_dioid.
+  Proof.
+  by move=> a b /andP[]; rewrite /le => /eqP ? /eqP; rewrite adddC => <-.
+  Qed.
+
+  Lemma le_trans_dioid : transitive le_dioid.
+  Proof.
+  move=> a b c; rewrite /le_dioid => /eqP H /eqP <-.
+  by rewrite -[in X in _ == X]H adddA.
+  Qed.
+
+  Definition dioid_porderMixin :=
+    LePOrderMixin lt_def_dioid le_refl_dioid le_anti_dioid le_trans_dioid.
+
+  HB.instance Definition to_WrapPOrder_of_WrapChoice :=
+    WrapPOrder_of_WrapChoice.Build D dioid_porderMixin.
+
+  Lemma le_def (a b : D) :
+    Order.POrder.le wrap_porderMixin a b =
+    Equality.op wrap_eqMixin (SemiRing.Exports.add a b) b.
+  Proof. by []. Qed.
+
+  HB.instance Definition to_Dioid_of_SemiRing_and_WrapPOrder :=
+    Dioid_of_SemiRing_and_WrapPOrder.Build D adddd le_def.
 
 HB.end.
 
-HB.structure Definition Dioid := { D of Dioid_of_TYPE D }.
+HB.structure Definition Dioid :=
+  { D of WrapChoice D & Dioid_of_WrapChoice D }.
+
+Coercion Dioid_to_Equality (T : Dioid.type) :=
+  Eval hnf in [eqType of T for T].
+Canonical Dioid_to_Equality.
+Coercion Dioid_to_Choice (T : Dioid.type) :=
+  Eval hnf in [choiceType of T for T].
+Canonical Dioid_to_Choice.
+Coercion Dioid_to_POrder (T : Dioid.type) :=
+  Eval hnf in [porderType of T for T].
+Canonical Dioid_to_POrder.
 
 Section DioidTheory.
 
@@ -197,53 +266,24 @@ Variables D : Dioid.type.
 
 Implicit Type a b c : D.
 
-Canonical dioid_eqType := EqType D semiRing_eqMixin.
-Canonical dioid_choiceType := ChoiceType D semiRing_choiceMixin.
-
 Local Notation "0" := zero : dioid_scope.
 Local Notation "1" := one : dioid_scope.
 Local Notation "+%D" := (@add _) : dioid_scope.
 Local Notation "*%D" := (@mul _) : dioid_scope.
 Local Infix "+" := (@add _) : dioid_scope.
 Local Infix "*" := (@mul _) : dioid_scope.
+Local Infix "<=" := (@Order.le _ _) : dioid_scope.
+Local Notation "a <= b :> T" := ((a : T) <= (b : T)) (only parsing) : dioid_scope.
 
-Definition le_dioid a b := a + b == b.
-
-Definition lt_dioid a b := (b != a) && le_dioid a b.
-
-Lemma lt_def_dioid a b : lt_dioid a b = (b != a) && le_dioid a b.
-Proof. by []. Qed.
-
-Lemma le_refl_dioid : reflexive le_dioid.
-Proof. by move=> a; rewrite /le_dioid adddd. Qed.
-
-Lemma le_anti_dioid : antisymmetric le_dioid.
-Proof.
-by move=> a b /andP[]; rewrite /le => /eqP ? /eqP; rewrite adddC => <-.
-Qed.
-
-Lemma le_trans_dioid : transitive le_dioid.
-Proof.
-move=> a b c; rewrite /le_dioid => /eqP H /eqP <-.
-by rewrite -[in X in _ == X]H adddA.
-Qed.
-
-Fact dioid_display : unit. Proof. by []. Qed.
-
-Definition dioid_porderMixin :=
-  LePOrderMixin lt_def_dioid le_refl_dioid le_anti_dioid le_trans_dioid.
-
-Canonical dioid_porderType :=
-  POrderType dioid_display D dioid_porderMixin.
-
-Local Notation "a <= b" := (@Order.le _ [porderType of D] a b) : dioid_scope.
+Lemma le_def a b : (a <= b) = (a + b == b).
+Proof. by rewrite /Order.le le_def. Qed.
 
 Lemma le0d a : 0 <= a :> D.
 Proof. by rewrite le_def add0d. Qed.
 
 Lemma led_add2r c : {homo +%D^~ c : a b / a <= b }.
 Proof.
-move => a b /eqP H; apply/eqP.
+move => a b; rewrite !le_def => /eqP H.
 by rewrite adddCA -adddA adddd adddA (adddC b) H.
 Qed.
 
@@ -254,77 +294,103 @@ Lemma led_add a b c d : a <= c -> b <= d -> a + b <= c + d.
 Proof. move=> Hac Hbd; exact/(le_trans (led_add2r _ Hac)) /led_add2l. Qed.
 
 Lemma led_addl a b : a <= b + a.
-Proof. by apply/eqP; rewrite adddCA adddd. Qed.
+Proof. by rewrite le_def adddCA adddd. Qed.
 
 Lemma led_addr a b : a <= a + b.
-Proof. by apply/eqP; rewrite adddA adddd. Qed.
+Proof. by rewrite le_def adddA adddd. Qed.
 
 Lemma led_add_eqv a b c :  (b + c <= a) = ((b <= a) && (c <= a)).
 Proof.
-apply/idP/idP => [Ha | /andP[/eqP <- /eqP <-]].
+apply/idP/idP => [Ha | /andP[]].
 - apply/andP; split.
   + exact/(le_trans _ Ha) /led_addr.
   + exact/(le_trans _ Ha) /led_addl.
-- by rewrite adddCA adddA led_addr.
+- rewrite 2!le_def => /eqP <- /eqP <-.
+  by rewrite adddCA adddA led_addr.
 Qed.
 
 Lemma led_mul2l c : {homo *%D c : a b / a <= b }.
-Proof. by move=> a b /eqP Hb; apply/eqP; rewrite -muldDr Hb. Qed.
+Proof. by move=> a b; rewrite le_def => /eqP <-; rewrite muldDr led_addr. Qed.
 
 Lemma led_mul2r c : {homo *%D^~ c : a b / a <= b }.
-Proof. by move=> a b /eqP Hb; apply/eqP; rewrite -muldDl Hb. Qed.
+Proof. by move=> a b; rewrite le_def => /eqP <-; rewrite muldDl led_addr. Qed.
 
 Lemma led_mul a b c d : a <= c -> b <= d -> a * b <= c * d.
 Proof. move=> Hac Hbd; exact/(le_trans (led_mul2r _ Hac)) /led_mul2l. Qed.
 
 End DioidTheory.
-Coercion dioid_eqType : Dioid.type >-> eqType.
-Coercion dioid_choiceType : Dioid.type >-> choiceType.
-Coercion dioid_porderType : Dioid.type >-> porderType.
 
 HB.factory Record ComDioid_of_Dioid D of Dioid D := {
   muldC : @commutative D _ mul;
 }.
 
-HB.builders Context D (a : ComDioid_of_Dioid D).
+HB.builders Context D (f : ComDioid_of_Dioid D).
 
   HB.instance Definition to_ComSemiRing_of_SemiRing :=
     ComSemiRing_of_SemiRing.Build D muldC.
 
 HB.end.
 
-HB.factory Record ComDioid_of_ComSemiRing D of ComSemiRing D := {
+HB.factory Record ComDioid_of_ComSemiRing_and_WrapPOrder D
+           of ComSemiRing D & WrapPOrder D := {
   adddd : @idempotent D add;
+  le_def : forall (a b : D),
+      (Order.POrder.le wrap_porderMixin a b)
+      = (Equality.op wrap_eqMixin (add a b) b);
 }.
 
-HB.builders Context D (a : ComDioid_of_ComSemiRing D).
+HB.builders Context D (f : ComDioid_of_ComSemiRing_and_WrapPOrder D).
 
-  HB.instance Definition to_Dioid_of_ComSemiRing :=
-    Dioid_of_SemiRing.Build D adddd.
+  HB.instance Definition to_Dioid_of_SemiRing_and_WrapPOrder :=
+    Dioid_of_SemiRing_and_WrapPOrder.Build D adddd le_def.
 
   HB.instance Definition to_ComDioid_of_Dioid :=
     ComDioid_of_Dioid.Build D muldC.
 
 HB.end.
 
-HB.factory Record ComDioid_of_SemiRing D of SemiRing D := {
-  adddd : @idempotent D add;
-  muldC : @commutative D _ mul;
+HB.factory Record ComDioid_of_WrapPOrder D of WrapPOrder D := {
+  zero : D;
+  one : D;
+  add : D -> D -> D;
+  mul : D -> D -> D;
+  adddA : associative add;
+  adddC : commutative add;
+  add0d : left_id zero add;
+  adddd : idempotent add;
+  muldA : associative mul;
+  muldC : commutative mul;
+  mul1d : left_id one mul;
+  muldDl : left_distributive mul add;
+  mul0d : left_zero zero mul;
+  le_def : forall (a b : D),
+      (Order.POrder.le wrap_porderMixin a b)
+      = (Equality.op wrap_eqMixin (add a b) b);
 }.
 
-HB.builders Context D (a : ComDioid_of_SemiRing D).
+HB.builders Context D (f : ComDioid_of_WrapPOrder D).
 
-  HB.instance Definition to_Dioid_of_SemiRing :=
-    Dioid_of_SemiRing.Build D adddd.
+  Lemma muld1 : right_id one mul.
+  Proof. by move=> x; rewrite muldC mul1d. Qed.
+
+  Lemma muldDr : right_distributive mul add.
+  Proof.
+  Proof. by move=> x y z; rewrite muldC muldDl !(muldC x). Qed.
+
+  Lemma muld0 : right_zero zero mul.
+  Proof. by move=> x; rewrite muldC mul0d. Qed.
+
+  HB.instance Definition to_Dioid_of_WrapPOrder :=
+    Dioid_of_WrapPOrder.Build
+      D adddA adddC add0d adddd
+      muldA mul1d muld1 muldDl muldDr mul0d muld0 le_def.
 
   HB.instance Definition to_ComDioid_of_Dioid :=
     ComDioid_of_Dioid.Build D muldC.
 
 HB.end.
 
-HB.factory Record ComDioid_of_TYPE D := {
-  comdioid_eqMixin : Equality.mixin_of D;
-  comdioid_choiceMixin : Choice.mixin_of D;
+HB.factory Record ComDioid_of_WrapChoice D of WrapChoice D := {
   zero : D;
   one : D;
   add : D -> D -> D;
@@ -340,33 +406,40 @@ HB.factory Record ComDioid_of_TYPE D := {
   mul0d : left_zero zero mul;
 }.
 
-HB.builders Context D (a : ComDioid_of_TYPE D).
+HB.builders Context D (f : ComDioid_of_WrapChoice D).
 
-  HB.instance Definition to_ComSemiRing_of_TYPE :=
-    ComSemiRing_of_TYPE.Build
-      D comdioid_eqMixin comdioid_choiceMixin
-      adddA adddC add0d muldA muldC mul1d muldDl mul0d.
+  Lemma muld1 : right_id one mul.
+  Proof. by move=> x; rewrite muldC mul1d. Qed.
 
-  HB.instance Definition to_ComDioid_of_ComSemiRing :=
-    ComDioid_of_ComSemiRing.Build D adddd.
+  Lemma muldDr : right_distributive mul add.
+  Proof.
+  Proof. by move=> x y z; rewrite muldC muldDl !(muldC x). Qed.
+
+  Lemma muld0 : right_zero zero mul.
+  Proof. by move=> x; rewrite muldC mul0d. Qed.
+
+  HB.instance Definition to_Dioid_of_WrapChoice :=
+    Dioid_of_WrapChoice.Build
+      D adddA adddC add0d adddd
+      muldA mul1d muld1 muldDl muldDr mul0d muld0.
+
+  HB.instance Definition to_ComDioid_of_Dioid :=
+    ComDioid_of_Dioid.Build D muldC.
 
 HB.end.
 
-HB.structure Definition ComDioid := { D of ComDioid_of_TYPE D }.
+HB.structure Definition ComDioid :=
+  { D of WrapChoice D & ComDioid_of_WrapChoice D }.
 
-Section ComDioidTheory.
-
-Variables D : ComDioid.type.
-
-Canonical comdioid_eqType := EqType D semiRing_eqMixin.
-Canonical comdioid_choiceType := ChoiceType D semiRing_choiceMixin.
-Canonical comdioid_porderType :=
-  POrderType dioid_display D (dioid_porderMixin D).
-
-End ComDioidTheory.
-Coercion comdioid_eqType : ComDioid.type >-> eqType.
-Coercion comdioid_choiceType : ComDioid.type >-> choiceType.
-Coercion comdioid_porderType : ComDioid.type >-> porderType.
+Coercion ComDioid_to_Equality (T : ComDioid.type) :=
+  Eval hnf in [eqType of T for T].
+Canonical ComDioid_to_Equality.
+Coercion ComDioid_to_Choice (T : ComDioid.type) :=
+  Eval hnf in [choiceType of T for T].
+Canonical ComDioid_to_Choice.
+Coercion ComDioid_to_POrder (T : ComDioid.type) :=
+  Eval hnf in [porderType of T for T].
+Canonical ComDioid_to_POrder.
 
 Notation "0" := zero : dioid_scope.
 Notation "1" := one : dioid_scope.

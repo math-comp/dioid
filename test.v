@@ -1,7 +1,7 @@
 From HB Require Import structures.
 From Coq Require Import ZArith ssreflect ssrbool.
 From mathcomp Require Import ssrfun eqtype choice order ssrnat bigop.
-Require Import mathcomp.dioid.dioid.
+Require Import mathcomp.dioid.HB_wrappers mathcomp.dioid.dioid.
 
 (** nat extended with -oo and +oo *)
 Variant enat := ENFin of nat | ENPInf | ENMInf.
@@ -80,20 +80,15 @@ Proof. by move=> [?||] [?||] [?||] //=; rewrite addn_maxl. Qed.
 Lemma mul0en : left_zero ezero mulen.
 Proof. by case. Qed.
 
-Definition enat_dioid_axioms :=
-  ComDioid_of_TYPE.Build
-    enat enat_eqMixin enat_choiceMixin
-    addenA addenC add0en addenen mulenA mulenC mul1en mulenDl mul0en.
+HB.instance Definition enat_WrapChoice_axioms :=
+  WrapChoice_of_TYPE.Build enat enat_eqMixin enat_choiceMixin.
+Canonical enat_eqType := [eqType of enat for enat_is_a_WrapChoice].
+Canonical enat_choiceType := [choiceType of enat for enat_is_a_WrapChoice].
 
-HB.instance enat enat_dioid_axioms.
-Fail Check @eq_op _ ezero ezero.
-Check @eq_op (dioid_eqType _) ezero ezero.
-Canonical enat_eqType := [eqType of enat for enat_is_a_SemiRing].
-Canonical enat_choiceType := [choiceType of enat for enat_is_a_SemiRing].
-Canonical enat_porderType := [porderType of enat for enat_is_a_Dioid].
-
-Check @eq_op _ ezero ezero.
-Check @eq_op (dioid_eqType _) ezero ezero.
+HB.instance Definition enat_ComDioid_axioms :=
+  ComDioid_of_WrapChoice.Build
+    enat addenA addenC add0en addenen mulenA mulenC mul1en mulenDl mul0en.
+Canonical enat_porderType := [porderType of enat for enat_is_a_WrapPOrder].
 
 Check (eone == ezero).
 

@@ -1,5 +1,6 @@
 -R . mathcomp.dioid
 -arg "-w -notation-overriden,-parsing"
+HB_wrappers.v
 dioid.v
 
 COQDOCFLAGS = "-g -interpolate -utf8 --external https://math-comp.github.io/htmldoc/ mathcomp -R . dioid"
