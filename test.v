@@ -103,3 +103,14 @@ Proof.
 rewrite adddC.
 exact: led_addr.
 Qed.
+
+Require Import mathcomp.analysis.classical_sets.
+Require Import mathcomp.dioid.complete_lattice.
+
+Parameter set_joinen : set enat -> enat.
+
+Axiom set_joinen_is_lub : set_f_is_lub wrap_porderMixin set_joinen.
+
+HB.instance Definition enat_CompleteLattice_axioms :=
+  CompleteLattice_of_WrapPOrder.Build enat set_joinen_is_lub.
+Canonical enat_latticeType := [latticeType of enat for enat_is_a_WrapLattice].

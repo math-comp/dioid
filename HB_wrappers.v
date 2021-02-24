@@ -40,3 +40,27 @@ Coercion WrapPOrder_to_POrder (T : WrapPOrder.type) :=
   @Order.POrder.pack
     T dioid_display (WrapChoice_to_Choice T) _ id wrap_porderMixin.
 Canonical WrapPOrder_to_POrder.
+
+HB.mixin Record WrapLattice_of_WrapPOrder T of WrapPOrder T := {
+  wrap_latticeMixin :
+    Order.Lattice.mixin_of
+      (@Order.POrder.Class
+         T (Choice.Class wrap_eqMixin wrap_choiceMixin) wrap_porderMixin);
+}.
+
+HB.structure Definition WrapLattice :=
+  { T of WrapPOrder T & WrapLattice_of_WrapPOrder T }.
+
+Coercion WrapLattice_to_Equality (T : WrapLattice.type) :=
+  Eval hnf in [eqType of T for T].
+Canonical WrapLattice_to_Equality.
+Coercion WrapLattice_to_Choice (T : WrapLattice.type) :=
+  Eval hnf in [choiceType of T for T].
+Canonical WrapLattice_to_Choice.
+Coercion WrapLattice_to_POrder (T : WrapLattice.type) :=
+  Eval hnf in [porderType of T for T].
+Canonical WrapLattice_to_POrder.
+Coercion WrapLattice_to_Lattice (T : WrapLattice.type) :=
+  @Order.Lattice.pack
+    T dioid_display (WrapPOrder_to_POrder T) _ id wrap_latticeMixin.
+Canonical WrapLattice_to_Lattice.
