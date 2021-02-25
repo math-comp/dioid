@@ -3,5 +3,6 @@
 HB_wrappers.v
 dioid.v
 complete_lattice.v
+complete_dioid.v
 
 COQDOCFLAGS = "-g -interpolate -utf8 --external https://math-comp.github.io/htmldoc/ mathcomp -R . dioid"

@@ -106,6 +106,7 @@ Qed.
 
 Require Import mathcomp.analysis.classical_sets.
 Require Import mathcomp.dioid.complete_lattice.
+Require Import mathcomp.dioid.complete_dioid.
 
 Parameter set_joinen : set enat -> enat.
 
@@ -114,3 +115,12 @@ Axiom set_joinen_is_lub : set_f_is_lub wrap_porderMixin set_joinen.
 HB.instance Definition enat_CompleteLattice_axioms :=
   CompleteLattice_of_WrapPOrder.Build enat set_joinen_is_lub.
 Canonical enat_latticeType := [latticeType of enat for enat_is_a_WrapLattice].
+
+Axiom set_mulenDl : forall (a : enat) (B : set enat),
+  (a * set_join B = set_join [set a * x | x in B])%D.
+
+Axiom set_mulenDr : forall (a : enat) (B : set enat),
+  (set_join B * a = set_join [set x * a | x in B])%D.
+
+HB.instance Definition enat_CompleteDioid_axioms :=
+  CompleteDioid_of_Dioid_and_CompleteLattice.Build enat set_mulenDl set_mulenDr.
