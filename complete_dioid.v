@@ -118,3 +118,75 @@ exact/(le_trans (H k))/set_add_led.
 Qed.
 
 End CompleteDioidTheory.
+
+HB.factory Record ComCompleteDioid_of_CompleteDioid D of CompleteDioid D := {
+  muldC : @commutative D _ mul;
+}.
+
+HB.builders Context D (f : ComCompleteDioid_of_CompleteDioid D).
+
+  HB.instance Definition to_ComDioid_of_Dioid :=
+    ComDioid_of_Dioid.Build D muldC.
+
+HB.end.
+
+HB.factory Record ComCompleteDioid_of_ComDioid_and_CompleteLattice D
+           of ComDioid D & CompleteLattice D := {
+  set_mulDl : forall (a : D) (B : set D),
+      a * set_join B = set_join [set a * x | x in B]%classic;
+}.
+
+HB.builders Context D (f : ComCompleteDioid_of_ComDioid_and_CompleteLattice D).
+
+  Lemma set_mulDr a (B : set D) :
+    set_join B * a = set_join [set x * a | x in B]%classic.
+  Proof.
+  by rewrite muldC set_mulDl; apply: f_equal; rewrite predeqP => x; split;
+    (move=> -[y Hy <-]; exists y; [|rewrite muldC]).
+  Qed.
+
+  HB.instance Definition to_CompleteDioid_of_Dioid_and_CompleteLattice :=
+    CompleteDioid_of_Dioid_and_CompleteLattice.Build D set_mulDl set_mulDr.
+
+  HB.instance Definition to_ComCompleteDioid_of_CompleteDioid :=
+    ComCompleteDioid_of_CompleteDioid.Build D muldC.
+
+HB.end.
+
+HB.factory Record ComCompleteDioid_of_CompleteLattice D
+           of CompleteLattice D := {
+  zero : D;
+  one : D;
+  add : D -> D -> D;
+  mul : D -> D -> D;
+  adddA : associative add;
+  adddC : commutative add;
+  add0d : left_id zero add;
+  adddd : idempotent add;
+  muldA : associative mul;
+  muldC : commutative mul;
+  mul1d : left_id one mul;
+  muldDl : left_distributive mul add;
+  mul0d : left_zero zero mul;
+  le_def : forall (a b : D),
+      (Order.POrder.le wrap_porderMixin a b)
+      = (Equality.op wrap_eqMixin (add a b) b);
+  set_mulDl : forall (a : D) (B : set D),
+      mul a (set_join B) = set_join [set mul a x | x in B]%classic;
+}.
+
+HB.builders Context D (f : ComCompleteDioid_of_CompleteLattice D).
+
+  HB.instance Definition to_ComDioid_of_WrapPOrder :=
+    ComDioid_of_WrapPOrder.Build
+      D adddA adddC add0d adddd
+      muldA muldC mul1d muldDl mul0d le_def.
+
+  HB.instance Definition to_ComCompleteDioid_of_ComDioid_and_CompleteLattice :=
+    ComCompleteDioid_of_ComDioid_and_CompleteLattice.Build
+      D set_mulDl.
+
+HB.end.
+
+HB.structure Definition ComCompleteDioid :=
+  { D of CompleteDioid D & ComCompleteDioid_of_CompleteDioid D }.
