@@ -26,6 +26,8 @@ Require Import HB_wrappers dioid complete_lattice.
 (*                   a^+ == the 'plus' operator (infinite sum of a^i, i > 0)  *)
 (*                 a / b == the residuation operator:                         *)
 (*                          x * b <= a <-> x <= a / b                         *)
+(* [CompleteDioid of U by <:] == CompleteDioid mixin for a subType whose base *)
+(*                          type is both a Dioid and a CompleteLattice.       *)
 (*                                                                            *)
 (*   * ComCompleteDioid:                                                      *)
 (* ComCompleteDioid.type == interface type for complete commutative dioid     *)
@@ -571,6 +573,73 @@ Qed.
 End ComResiduationTheory.
 
 End ComCompleteDioidTheory.
+
+Module SubType.
+
+Section CompleteDioid.
+
+Variables (V : CompleteDioid.type) (S : pred V).
+Variable (U : subType S).
+
+Variable D : Dioid.type.
+Variable cD : Dioid.axioms U.
+Hypothesis uUD : unify Type Type U D None.
+Hypothesis uUD' :
+  unify Dioid.type Dioid.type D (Dioid.Pack cD) None.
+Let U' := @Dioid.phant_clone U D cD uUD uUD'.
+
+Variable L : CompleteLattice.type.
+Variable cL : CompleteLattice.axioms U'.
+Hypothesis uU'L : unify Type Type U' L None.
+Hypothesis uU'L' :
+  unify CompleteLattice.type CompleteLattice.type L (CompleteLattice.Pack cL) None.
+Let U'' := @CompleteLattice.phant_clone U' L cL uU'L uU'L'.
+
+Hypothesis valM : forall x y : U'', val (x * y) = val x * val y.
+Hypothesis valSJ : forall B : set U'', val (set_join B) = set_join (val @` B).
+
+Lemma set_mulDl (a : U'') (B : set U'') :
+  a * set_join B = set_join [set (a * x : U'') | x in B].
+Proof.
+apply/val_inj; rewrite valM !valSJ set_mulDl.
+apply: f_equal; rewrite predeqP => x; split.
+- move=> -[_ [y Hy <-] <-].
+  by exists (a * y) => //; exists y.
+- move=> -[_ [y Hy <-] <-].
+  by exists (val y) => //; exists y.
+Qed.
+
+Lemma set_mulDr (a : U'') (B : set U'') :
+  set_join B * a = set_join [set (x * a : U'') | x in B].
+Proof.
+apply/val_inj; rewrite valM !valSJ set_mulDr.
+apply: f_equal; rewrite predeqP => x; split.
+- move=> -[_ [y Hy <-] <-].
+  by exists ((y : U'') * a) => //; exists y.
+- move=> -[_ [y Hy <-] <-].
+  by exists (val y) => //; exists y.
+Qed.
+
+End CompleteDioid.
+
+Module Exports.
+
+Notation "[ 'CompleteDioid' 'of' R 'by' <: ]" :=
+  (CompleteDioid_of_Dioid_and_CompleteLattice.Build
+     R
+     (@SubType.set_mulDl
+        _ _ _ (Dioid.clone R _) _ id_phant id_phant
+        (CompleteLattice.clone R _) _ id_phant id_phant (rrefl _) (frefl _))
+     (@SubType.set_mulDr
+        _ _ _ (Dioid.clone R _) _ id_phant id_phant
+        (CompleteLattice.clone R _) _ id_phant id_phant (rrefl _) (frefl _)))
+  (at level 0, format "[ 'CompleteDioid' 'of' R 'by' <: ]") : form_scope.
+
+End Exports.
+
+End SubType.
+
+Export SubType.Exports.
 
 Notation "a ^ i" := (@exp _ a i) : dioid_scope.
 Notation "a ^*" := (@op_kleene _ a) (at level 20) : dioid_scope.

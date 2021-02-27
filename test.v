@@ -104,6 +104,104 @@ rewrite adddC.
 exact: led_addr.
 Qed.
 
+Section Test1.
+
+Variable R : SemiRing.type.
+Variables x y : R.
+
+Check (x + 1 * y)%D.
+
+Check (1 + y)%D.
+
+End Test1.
+
+Definition evenenat_def (x : enat) : bool :=
+  match x with
+  | ENPInf | ENMInf => true
+  | ENFin x => ~~ odd x
+  end.
+
+Definition evenenat := [qualify a x | evenenat_def x].
+
+Record eenat := {
+  eenat_val :> enat;
+  eenat_prop : eenat_val \is a evenenat
+}.
+
+Canonical eenat_subType := [subType for eenat_val].
+Definition eenat_eqMixin := Eval hnf in [eqMixin of eenat by <:].
+Canonical eenat_eqType := Eval hnf in EqType eenat eenat_eqMixin.
+Definition eenat_choiceMixin := Eval hnf in [choiceMixin of eenat by <:].
+Canonical eenat_choiceType := Eval hnf in ChoiceType eenat eenat_choiceMixin.
+
+HB.instance Definition eenat_WrapChoice_axioms :=
+  WrapChoice_of_TYPE.Build eenat eenat_eqMixin eenat_choiceMixin.
+
+Lemma eenat_semiring : semiring_closed evenenat.
+Proof.
+split; split=> [// | x y Hx Hy].
+- case: x Hx => [x||] Hx; case: y Hy => [y||] Hy //.
+  by rewrite /add /=; case: ltnP => _.
+- case: x Hx => [x||] Hx; case: y Hy => [y||] Hy //.
+  move: Hx Hy; rewrite /mem /in_mem /= oddD.
+  by move=> /negbTE -> /negbTE ->.
+Qed.
+
+Fact eenat_key : pred_key evenenat. Proof. by []. Qed.
+Canonical eenat_keyed := KeyedQualifier eenat_key.
+Canonical eenat_addPred := AddPred eenat_semiring.
+Canonical eenat_semiringPred := SemiRingPred eenat_semiring.
+
+Definition eenat_semiRing := Eval hnf in [SemiRing of eenat by <:].
+HB.instance eenat eenat_semiRing.
+
+Section Test2.
+
+Variables x y : eenat.
+
+Check (x + 1 * y)%D.
+
+Check (1 + y)%D.
+
+Variable z : enat.
+
+Check ((x : enat) + z)%D.
+
+Check (z + x)%D.
+
+Goal (x * y = y * x)%D.
+Proof.
+Fail rewrite muldC.
+apply/val_inj.
+by rewrite /= muldC.
+Qed.
+
+End Test2.
+
+Definition eenat_comSemiRing := Eval hnf in [ComSemiRing of eenat by <:].
+HB.instance eenat eenat_comSemiRing.
+
+Section Test3.
+
+Variables x y : eenat.
+
+Goal (x * y = y * x)%D.
+Proof.
+by rewrite muldC.
+Qed.
+
+End Test3.
+
+Definition eenat_porderMixin := Eval hnf in [porderMixin of eenat by <:].
+Canonical eenat_porderType :=
+  Order.POrder.pack dioid_display id eenat_porderMixin.
+
+HB.instance Definition eenat_WrapPOrder_axioms :=
+  WrapPOrder_of_WrapChoice.Build eenat eenat_porderMixin.
+
+Definition eenat_dioid := Eval hnf in [Dioid of eenat by <:].
+HB.instance eenat eenat_dioid.
+
 Require Import mathcomp.analysis.classical_sets.
 Require Import mathcomp.dioid.complete_lattice.
 Require Import mathcomp.dioid.complete_dioid.
@@ -124,3 +222,20 @@ Axiom set_mulenDr : forall (a : enat) (B : set enat),
 
 HB.instance Definition enat_CompleteDioid_axioms :=
   CompleteDioid_of_Dioid_and_CompleteLattice.Build enat set_mulenDl set_mulenDr.
+
+Parameter eenat_latticeMixin : latticeMixin eenat_porderType.
+HB.instance Definition eenat_WrapLattice_axioms :=
+  WrapLattice_of_WrapPOrder.Build eenat eenat_latticeMixin.
+Canonical eenat_latticeType := [latticeType of eenat for eenat_is_a_WrapLattice].
+
+Axiom eenat_set_join : set_join_closed evenenat.
+
+Canonical eenat_setJoinPred := SetJoinPred eenat_set_join.
+
+Definition eenat_completeLattice :=
+  Eval hnf in [CompleteLattice of eenat by <:].
+HB.instance eenat eenat_completeLattice.
+
+Definition eenat_completeDioid :=
+  Eval hnf in [CompleteDioid of eenat by <:].
+HB.instance eenat eenat_completeDioid.

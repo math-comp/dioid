@@ -22,6 +22,15 @@ Require Import HB_wrappers.
 (*                          algebraic properties of its operation.            *)
 (*                          The carrier type T must have a WrapPOrder         *)
 (*                          canonical structure (see HB_wrappers.v).          *)
+(*     set_join_closed S <-> collective predicate S is closed under join      *)
+(* SetJoinPred set_joinS == packs set_joinS : set_join_closed S into a        *)
+(*                          setJoinPred S interface structure associating     *)
+(*                          this property to the canonical pred_key S, i.e    *)
+(*                          the k for wich S has a Canonical keyed_pred k     *)
+(*                          structure. (see file ssrbool.v)                   *)
+(* [CompleteLattice of U by <:] == CompleteLattice mixin for a subType whose  *)
+(*                          base type is a WrapLattice and whose predicate's  *)
+(*                          canonical pred_key is a setJoinPred.              *)
 (*                                                                            *)
 (* --> After declaring an instance of CompleteLattice on T using              *)
 (*     CompleteLattice_of_WrapPOrder.Build the new latticeType instance must  *)
@@ -37,6 +46,7 @@ Unset Printing Implicit Defensive.
 
 Import Order.Theory.
 
+Local Open Scope classical_set_scope.
 Local Open Scope order_scope.
 
 Definition set_f_is_lub T (eM : Equality.mixin_of T)
@@ -254,7 +264,7 @@ Proof. move=> y Hy; exact: (proj1 set_join_is_lub). Qed.
 Lemma set_join_le_ub S x : (ubound S) x -> set_join S <= x.
 Proof. move=> Hx; exact/(proj2 set_join_is_lub)/Hx. Qed.
 
-Lemma set_join_le_incl S S' : (S `<=` S')%classic -> set_join S <= set_join S'.
+Lemma set_join_le_incl S S' : (S `<=` S') -> set_join S <= set_join S'.
 Proof. move=> H; apply: set_join_le_ub => x Hx; exact/set_join_ub/H. Qed.
 
 Lemma set_join_unique S x :
@@ -317,7 +327,7 @@ Qed.
 Lemma set_meet_ge_lb S x : (lbound S) x -> x <= set_meet S.
 Proof. move: x; rewrite ubP; exact: set_join_ub. Qed.
 
-Lemma set_meet_le_incl S S' : (S `<=` S')%classic -> set_meet S' <= set_meet S.
+Lemma set_meet_le_incl S S' : (S `<=` S') -> set_meet S' <= set_meet S.
 Proof. move=> H; apply: set_meet_ge_lb => x Hx; exact/set_meet_lb/H. Qed.
 
 Lemma set_meet_unique S x :
@@ -399,4 +409,124 @@ apply/le_anti/andP; split.
 - apply: set_meetU_ge; [exact: leIl|exact: leIr].
 Qed.
 
+Section ClosedPredicates.
+
+Variable S : predPredType T.
+
+Definition set_join_closed :=
+  forall (B : set T), (forall x, B x -> x \in S) -> set_join B \in S.
+
+End ClosedPredicates.
+
 End CompleteLatticeTheory.
+
+(* Interface structures for algebraically closed predicates. *)
+Module Pred.
+
+Structure set_join V S :=
+  SetJoin {set_join_key : pred_key S; _ : @set_join_closed V S}.
+
+Section Extensionality.
+(* This could be avoided by exploiting the Coq 8.4 eta-convertibility.        *)
+
+Lemma set_join_ext (U : CompleteLattice.type) S k (kS : @keyed_pred U S k) :
+  set_join_closed kS -> set_join_closed S.
+Proof.
+move=> set_addS ? HB; rewrite -!(keyed_predE kS).
+apply: set_addS => ? ?; rewrite keyed_predE; exact: HB.
+Qed.
+
+End Extensionality.
+
+Module Exports.
+
+Notation set_join_closed := set_join_closed.
+
+Coercion set_join_key : set_join >-> pred_key.
+
+Notation setJoinPred := set_join.
+
+Definition SetJoinPred U S k kS DkS := SetJoin k (@set_join_ext U S k kS DkS).
+
+End Exports.
+
+End Pred.
+Import Pred.Exports.
+
+Section CompleteLatticePred.
+
+Variables (V : CompleteLattice.type) (S : predPredType V).
+
+Section SetJoin.
+
+Variables (setJoinS : setJoinPred S) (kS : keyed_pred setJoinS).
+Variable U : subType (mem kS).
+
+Let U' := @sub_sort (CompleteLattice.sort V) _ U.
+
+Lemma rpredSJ (B : set U') : set_join (val @` B) \in kS.
+Proof.
+rewrite keyed_predE.
+move: B; rewrite /U'.
+move: setJoinS kS U => -[k S' kS'] U'' B.
+apply: (S' _) => _ [x _ <-].
+rewrite -(keyed_predE kS').
+rewrite /in_mem /=.
+exact: valP.
+Qed.
+
+End SetJoin.
+
+End CompleteLatticePred.
+
+Module SubType.
+
+Section CompleteLattice.
+
+Variables (V : CompleteLattice.type) (S : predPredType V).
+Variables (subS : setJoinPred S) (kS : keyed_pred subS).
+Variable U : subType (mem kS).
+
+Variable L : WrapLattice.type.
+Variable cL : WrapLattice.axioms U.
+Hypothesis uUL : unify Type Type U L None.
+Hypothesis uUL' :
+  unify WrapLattice.type WrapLattice.type L (WrapLattice.Pack cL) None.
+Let U' := @WrapLattice.phant_clone U L cL uUL uUL'.
+
+Let inU v Sv : U' := Sub v Sv.
+Let set_joinU (B : set U') := inU (rpredSJ B).
+
+Hypothesis val_le : forall x y : U', (x <= y)%O = (val x <= val y)%O.
+
+Lemma set_join_is_lub : set_f_is_lub wrap_porderMixin set_joinU.
+Proof.
+split.
+{ move=> B x Hx.
+  rewrite -[Order.POrder.le _ _ _]/(x <= set_joinU B)%O val_le.
+  rewrite SubK.
+  exact/set_join_ub/imageP. }
+move=> B y Hy.
+rewrite -[Order.POrder.le _ _ _]/(set_joinU B <= y)%O val_le.
+rewrite SubK.
+apply: set_join_le_ub => _ [x Hx <-].
+rewrite -val_le; exact: Hy.
+Qed.
+
+Definition completeLatticeMixin :=
+  CompleteLattice_of_WrapLattice.Build _ set_join_is_lub.
+
+End CompleteLattice.
+
+Module Exports.
+
+Notation "[ 'CompleteLattice' 'of' U 'by' <: ]" :=
+  (@completeLatticeMixin
+     _ _ _ _ _ (WrapLattice.clone U _) _ id_phant id_phant (rrefl _))
+  (at level 0, format "[ 'CompleteLattice' 'of' U 'by' <: ]") : form_scope.
+
+End Exports.
+
+End SubType.
+
+Export Pred.Exports SubType.Exports.

@@ -23,6 +23,29 @@ Require Import HB_wrappers.
 (*                     1 == the unit element (multiplicative identity)        *)
 (*                 x + y == the addition of x and y in a semiRing             *)
 (*                 x * y == the multiplication of x and y in a semiRing       *)
+(*         addd_closed S <-> collective predicate S is closed under           *)
+(*                          finite sums (0 and x + y in S, for x, y in S)     *)
+(*         muld_closed S <-> collective predicate S is closed under finite    *)
+(*                          multiplication (0 and x * y in S, for x, y in S)  *)
+(*     semiring_closed S <-> collective predicate S is closed under finite    *)
+(*                          addition and multiplication. This property        *)
+(*                          coerces to addd_closed and muld_closed.           *)
+(*          AddPred addS == packs addS : addd_closed S into an addPred S      *)
+(*                          interface structure associating this property to  *)
+(*                          the canonical pred_key S, i.e the k for wich S    *)
+(*                          has a Canonical keyed_pred k structure.           *)
+(*                          (see file ssrbool.v)                              *)
+(*          MulPred mulS == packs mulS : muld_closed S into a mulPred S       *)
+(*                          interface structure associating this property to  *)
+(*                          the canonical pred_key S                          *)
+(*     SemiRingPred mulS == packs mulS : muld_closed S into a semiringPred S  *)
+(*                          interface structure associating the               *)
+(*                          semiring_closed property to the canonical         *)
+(*                          pred_key S (see above), wich must already be an   *)
+(*                          AddPred.                                          *)
+(* [SemiRing of U by <:] == semiRingType mixin for a subType whose base type  *)
+(*                          is a semiRingType and whose predicate's canonical *)
+(*                          pred_key is a semiRingPred.                       *)
 (*                                                                            *)
 (*   * ComSemiRing (multiplication is commutative):                           *)
 (*      ComSemiRing.type == interface type for commutative semi ring          *)
@@ -36,6 +59,8 @@ Require Import HB_wrappers.
 (*                          obligations.                                      *)
 (*                          The carrier type T must have a WrapChoice         *)
 (*                          canonical structure (see HB_wrappers.v).          *)
+(* [ComSemiRing of R by <:] == commutativity mixin axiom for R when it is a   *)
+(*                          subType of a commutative semi-ring.               *)
 (*                                                                            *)
 (*   * Dioid (idempotent semi-rings):                                         *)
 (*            Dioid.type == interface type for dioid structure.               *)
@@ -54,6 +79,8 @@ Require Import HB_wrappers.
 (*                          properties of its operations.                     *)
 (*                          The carrier type T must have a WrapChoice         *)
 (*                          canonical structure (see HB_wrappers.v).          *)
+(*    [Dioid of R by <:] == idempotent mixin axiom for R when it is a         *)
+(*                          subType of a dioid.                               *)
 (*                                                                            *)
 (*   * ComDioid:                                                              *)
 (*         ComDioid.yype == interface type for commutative dioid structure    *)
@@ -76,6 +103,8 @@ Require Import HB_wrappers.
 (*                          obligations.                                      *)
 (*                          The carrier type T must have a WrapChoice         *)
 (*                          canonical structure (see HB_wrappers.v).          *)
+(* [ComDioid of D by <:] == commutativity mixin axiom for S when it is a      *)
+(*                          subType of a commutative dioid.                   *)
 (*                                                                            *)
 (* --> After declaring an instance of (Com)Dioid on T using                   *)
 (*     (Com)Dioid_of_WrapChoice.Build the new porderType instance must be     *)
@@ -136,8 +165,11 @@ Canonical mul_monoid := @Monoid.Law R _ _ muldA mul1d muld1.
 Canonical muloid := @Monoid.MulLaw R _ _ mul0d muld0.
 Canonical addoid := Monoid.AddLaw muldDl muldDr.
 
+Local Notation "0" := zero : dioid_scope.
+Local Notation "1" := one : dioid_scope.
 Local Notation "+%D" := (@add _) : dioid_scope.
 Local Infix "+" := (@add _) : dioid_scope.
+Local Infix "*" := (@mul _) : dioid_scope.
 
 Lemma adddAC : right_commutative (S := R) +%D.
 Proof. by move=> x y z; rewrite -adddA (adddC y) adddA. Qed.
@@ -147,6 +179,21 @@ Proof. by move=> x y z; rewrite adddC -adddA (adddC x). Qed.
 
 Lemma adddACA : interchange (S := R) +%D +%D.
 Proof. by move=> a b c d; rewrite adddAC adddA -adddA (adddC d). Qed.
+
+Section ClosedPredicates.
+
+Variable S : predPredType R.
+
+Definition addd_closed := 0 \in S /\ {in S &, forall u v, u + v \in S}.
+Definition muld_closed := 1 \in S /\ {in S &, forall u v, u * v \in S}.
+Definition semiring_closed := addd_closed /\ muld_closed.
+
+Lemma semiring_closedA : semiring_closed -> addd_closed.
+Proof. by case. Qed.
+Lemma semiring_closedM : semiring_closed -> muld_closed.
+Proof. by case. Qed.
+
+End ClosedPredicates.
 
 End SemiRingTheory.
 
@@ -516,6 +563,203 @@ Canonical ComDioid_to_Choice.
 Coercion ComDioid_to_POrder (T : ComDioid.type) :=
   Eval hnf in [porderType of T for T].
 Canonical ComDioid_to_POrder.
+
+(* Interface structures for algebraically closed predicates. *)
+Module Pred.
+
+Structure add V S := Add {add_key : pred_key S; _ : @addd_closed V S}.
+Structure mul R S := Mul {mul_key : pred_key S; _ : @muld_closed R S}.
+Structure semiring R S :=
+  SemiRing {semiring_add : add S; _ : @muld_closed R S}.
+
+Section Subtyping.
+
+Fact semiring_mulr R S : @semiring R S -> muld_closed S.
+Proof. by case. Qed.
+
+Definition semiring_mul R S (ringS : @semiring R S) :=
+  Mul (add_key (semiring_add ringS)) (semiring_mulr ringS).
+
+End Subtyping.
+
+Section Extensionality.
+(* This could be avoided by exploiting the Coq 8.4 eta-convertibility.        *)
+
+Lemma add_ext (U : SemiRing.type) S k (kS : @keyed_pred U S k) :
+  addd_closed kS -> addd_closed S.
+Proof.
+by case=> S0 addS; split=> [|x y]; rewrite -!(keyed_predE kS) //; apply: addS.
+Qed.
+
+Lemma mul_ext (R : SemiRing.type) S k (kS : @keyed_pred R S k) :
+  muld_closed kS -> muld_closed S.
+Proof.
+by case=> S1 mulS; split=> [|x y]; rewrite -!(keyed_predE kS) //; apply: mulS.
+Qed.
+
+End Extensionality.
+
+Module Exports.
+
+Notation addd_closed := addd_closed.
+Notation muld_closed := muld_closed.
+Notation semiring_closed := semiring_closed.
+
+Coercion semiring_closedA : semiring_closed >-> addd_closed.
+Coercion semiring_closedM : semiring_closed >-> muld_closed.
+Coercion add_key : add >-> pred_key.
+Coercion mul_key : mul >-> pred_key.
+Coercion semiring_add : semiring >-> add.
+Coercion semiring_mul : semiring >-> mul.
+Canonical semiring_mul.
+
+Notation addPred := add.
+Notation mulPred := mul.
+Notation semiringPred := semiring.
+
+Definition AddPred U S k kS DkS := Add k (@add_ext U S k kS DkS).
+Definition MulPred R S k kS MkS := Mul k (@mul_ext R S k kS MkS).
+Definition SemiRingPred R S k kS MkS := SemiRing k (@mul_ext R S k kS MkS).
+
+End Exports.
+
+End Pred.
+Import Pred.Exports.
+
+Section SemiRingPred.
+
+Variables (V : SemiRing.type) (S : predPredType V).
+
+Section Add.
+
+Variables (addS : addPred S) (kS : keyed_pred addS).
+
+Lemma rpred0D : addd_closed kS.
+Proof. split=> [|x y]; rewrite !keyed_predE; case: addS=> _ [_]//; exact. Qed.
+
+Lemma rpred0 : (@zero V) \in kS.
+Proof. by case: rpred0D. Qed.
+
+Lemma rpredD : {in kS &, forall u v, (@add V u v) \in kS}.
+Proof. by case: rpred0D. Qed.
+
+End Add.
+
+Section Mul.
+
+Variables (mulS : mulPred S) (kS : keyed_pred mulS).
+
+Lemma rpred1M : muld_closed kS.
+Proof.
+split=> [ | x y]; rewrite !keyed_predE; case: mulS => _ [_] //; exact.
+Qed.
+
+Lemma rpred1 : (@one V) \in kS.
+Proof. by case: rpred1M. Qed.
+
+Lemma rpredM : {in kS &, forall u v, (@mul V u v) \in kS}.
+Proof. by case: rpred1M. Qed.
+
+End Mul.
+
+End SemiRingPred.
+
+Module SubType.
+
+Section SemiRing.
+
+Variables (V : SemiRing.type) (S : predPredType V).
+Variables (subS : semiringPred S) (kS : keyed_pred subS).
+Variable U : subType (mem kS).
+
+Let inU v Sv : U := Sub v Sv.
+Let zeroU := inU (rpred0 kS).
+Let oneU := inU (rpred1 kS).
+Let addU (u1 u2 : U) := inU (rpredD (valP u1) (valP u2)).
+Let mulU (u1 u2 : U) := inU (rpredM (valP u1) (valP u2)).
+
+Fact adddA : associative addU.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK adddA. Qed.
+
+Fact adddC : commutative addU.
+Proof. by move=> a b; apply: val_inj; rewrite !SubK adddC. Qed.
+
+Fact add0d : left_id zeroU addU.
+Proof. by move=> a; apply: val_inj; rewrite !SubK add0d. Qed.
+
+Fact muldA : associative mulU.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldA. Qed.
+
+Fact mul1d : left_id oneU mulU.
+Proof. by move=> a; apply: val_inj; rewrite !SubK mul1d. Qed.
+
+Fact muld1 : right_id oneU mulU.
+Proof. by move=> a; apply: val_inj; rewrite !SubK muld1. Qed.
+
+Fact muldDl : @left_distributive U U mulU addU.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldDl. Qed.
+
+Fact muldDr : right_distributive mulU addU.
+Proof. by move=> a b c; apply: val_inj; rewrite !SubK muldDr. Qed.
+
+Lemma mul0d : left_zero zeroU mulU.
+Proof. by move=> a; apply: val_inj; rewrite !SubK mul0d. Qed.
+
+Lemma muld0 : right_zero zeroU mulU.
+Proof. by move=> a; apply: val_inj; rewrite !SubK muld0. Qed.
+
+Definition semiRingMixin of phant U :=
+  SemiRing_of_WrapChoice.Build
+    _ adddA adddC add0d muldA mul1d muld1 muldDl muldDr mul0d muld0.
+
+End SemiRing.
+
+Lemma comSemiRingMixin (R : ComSemiRing.type) (T : SemiRing.type) (f : T -> R) :
+phant T -> injective f -> {morph f : x y / mul x y} -> commutative (@mul T).
+Proof. by move=> _ inj_f fM x y; apply: inj_f; rewrite !fM muldC. Qed.
+
+Lemma dioidMixin (R : Dioid.type) (T : SemiRing.type) (f : T -> R) :
+phant T -> injective f -> {morph f : x y / add x y} -> @idempotent T add.
+Proof. by move=> _ inj_f fM x; apply: inj_f; rewrite !fM adddd. Qed.
+
+Lemma dioidMixin' (R : Dioid.type) (T : SemiRing.type) (f : T -> R)
+  (_ : phant T) (eM : Equality.mixin_of T) (oM : @Order.POrder.mixin_of T eM) :
+injective f -> {morph f : x y / add x y} ->
+{mono f : x y / Equality.op eM x y >-> x == y} ->
+{mono f : x y / Order.POrder.le oM x y >-> (x <= y)%O} ->
+forall (a b : T), (Order.POrder.le oM a b) = (Equality.op eM (add a b) b).
+Proof. by move=> inj_f fM fM' fM'' x y; rewrite -fM'' le_def -fM fM'. Qed.
+
+Lemma comDioidMixin (R : ComDioid.type) (T : Dioid.type) (f : T -> R) :
+phant T -> injective f -> {morph f : x y / mul x y} -> commutative (@mul T).
+Proof. by move=> _ inj_f fM x y; apply: inj_f; rewrite !fM muldC. Qed.
+
+Module Exports.
+
+Notation "[ 'SemiRing' 'of' U 'by' <: ]" := (semiRingMixin (Phant U))
+  (at level 0, format "[ 'SemiRing' 'of' U 'by' <: ]") : form_scope.
+
+Notation "[ 'ComSemiRing' 'of' R 'by' <: ]" :=
+  (ComSemiRing_of_SemiRing.Build
+     _ (comSemiRingMixin (Phant R) val_inj (rrefl _)))
+  (at level 0, format "[ 'ComSemiRing' 'of' R 'by' <: ]") : form_scope.
+
+Notation "[ 'Dioid' 'of' R 'by' <: ]" :=
+  (Dioid_of_SemiRing_and_WrapPOrder.Build
+     R%type (dioidMixin (Phant R) val_inj (rrefl _))
+     (@dioidMixin' _ _ _ (Phant R) wrap_eqMixin wrap_porderMixin
+                  val_inj (rrefl _) (rrefl _) (rrefl _)))
+  (at level 0, format "[ 'Dioid' 'of' R 'by' <: ]") : form_scope.
+
+Notation "[ 'ComDioid' 'of' R 'by' <: ]" :=
+  (ComDioid_of_Dioid.Build _ (comDioidMixin (Phant R) val_inj (rrefl _)))
+  (at level 0, format "[ 'ComDioid' 'of' R 'by' <: ]") : form_scope.
+
+End Exports.
+
+End SubType.
+
+Export Pred.Exports SubType.Exports.
 
 Notation "0" := zero : dioid_scope.
 Notation "1" := one : dioid_scope.
