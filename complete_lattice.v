@@ -4,12 +4,32 @@ From mathcomp Require Import ssrnat bigop.
 Require Import mathcomp.analysis.classical_sets.
 Require Import HB_wrappers.
 
-(** After declaring an instance of [CompleteLattice] on [T] using
-  [CompleteLattice_of_WrapPOrder.Build], the new [latticeType]
-  instance must be made canonical by hand:
-  <<
-  Canonical T_latticeType := [latticeType of T for T_is_a_WrapLattice].
-  >> *)
+(******************************************************************************)
+(* The algebraic structures of complete lattices                              *)
+(*                                                                            *)
+(* This file defines for each structure its type, its packers and its         *)
+(* canonical properties:                                                      *)
+(*                                                                            *)
+(*   * CompleteLattice:                                                       *)
+(*  CompleteLattice.type == interface type for complete lattice structure     *)
+(* CompleteLattice_of_WrapLattice.Build set_join_is_lub                       *)
+(*                       == builds a CompleteLattice structure from the       *)
+(*                          algebraic properties of its operation.            *)
+(*                          The carrier type T must have a WrapLattice        *)
+(*                          canonical structure (see HB_wrappers.v).          *)
+(* CompleteLattice_of_WrapPOrder.Build set_join_is_lub                        *)
+(*                       == builds a CompleteLattice structure from the       *)
+(*                          algebraic properties of its operation.            *)
+(*                          The carrier type T must have a WrapPOrder         *)
+(*                          canonical structure (see HB_wrappers.v).          *)
+(*                                                                            *)
+(* --> After declaring an instance of CompleteLattice on T using              *)
+(*     CompleteLattice_of_WrapPOrder.Build the new latticeType instance must  *)
+(*     be made canonical by hand:                                             *)
+(*     <<                                                                     *)
+(*     Canonical T_latticeType := [latticeType of T for T_is_a_WrapLattice].  *)
+(*     >>                                                                     *)
+(******************************************************************************)
 
 Set Implicit Arguments.
 Unset Strict Implicit.
