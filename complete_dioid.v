@@ -59,8 +59,8 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Reserved Notation "x ^+" (at level 20, format "x ^+").
-Reserved Notation "x ^*" (at level 20, format "x ^*").
+Reserved Notation "x ^+" (at level 2, format "x ^+").
+Reserved Notation "x ^*" (at level 2, format "x ^*").
 
 Local Open Scope classical_set_scope.
 Local Open Scope order_scope.
@@ -185,8 +185,8 @@ Definition div a b := set_add [set c | c * b <= a].
 End KleeneOperatorsDefinitions.
 
 Local Notation "a ^ i" := (exp a i) : dioid_scope.
-Local Notation "a ^*" := (op_kleene a) (at level 20) : dioid_scope.
-Local Notation "a ^+" := (op_plus a) (at level 20) : dioid_scope.
+Local Notation "a ^*" := (op_kleene a) : dioid_scope.
+Local Notation "a ^+" := (op_plus a) : dioid_scope.
 Local Notation "a / b" := (div a b) : dioid_scope.
 
 Section KleeneStar.
@@ -521,8 +521,8 @@ Variables D : ComCompleteDioid.type.
 Implicit Types a b : D.
 
 Local Notation "a ^ i" := (@exp _ a i) : dioid_scope.
-Local Notation "a ^*" := (@op_kleene _ a) (at level 20) : dioid_scope.
-Local Notation "a ^+" := (@op_plus _ a) (at level 20) : dioid_scope.
+Local Notation "a ^*" := (@op_kleene _ a) : dioid_scope.
+Local Notation "a ^+" := (@op_plus _ a) : dioid_scope.
 Local Notation "a / b" := (div a b) : dioid_scope.
 
 Section ComResiduationTheory.
@@ -642,6 +642,6 @@ End SubType.
 Export SubType.Exports.
 
 Notation "a ^ i" := (@exp _ a i) : dioid_scope.
-Notation "a ^*" := (@op_kleene _ a) (at level 20) : dioid_scope.
-Notation "a ^+" := (@op_plus _ a) (at level 20) : dioid_scope.
+Notation "a ^*" := (@op_kleene _ a) : dioid_scope.
+Notation "a ^+" := (@op_plus _ a) : dioid_scope.
 Notation "a / b" := (div a b) : dioid_scope.
