@@ -442,16 +442,8 @@ End ResiduationTheory.
 
 End CompleteDioidTheory.
 
-HB.factory Record ComCompleteDioid_of_CompleteDioid D of CompleteDioid D := {
-  muldC : @commutative D _ mul;
-}.
-
-HB.builders Context D (f : ComCompleteDioid_of_CompleteDioid D).
-
-  HB.instance Definition to_ComDioid_of_Dioid :=
-    ComDioid_of_Dioid.Build D muldC.
-
-HB.end.
+HB.structure Definition ComCompleteDioid :=
+  { D of ComSemiRing D & CompleteDioid D }.
 
 HB.factory Record ComCompleteDioid_of_ComDioid_and_CompleteLattice D
            of ComDioid D & CompleteLattice D := {
@@ -470,9 +462,6 @@ HB.builders Context D (f : ComCompleteDioid_of_ComDioid_and_CompleteLattice D).
 
   HB.instance Definition to_CompleteDioid_of_Dioid_and_CompleteLattice :=
     CompleteDioid_of_Dioid_and_CompleteLattice.Build D set_mulDl set_mulDr.
-
-  HB.instance Definition to_ComCompleteDioid_of_CompleteDioid :=
-    ComCompleteDioid_of_CompleteDioid.Build D muldC.
 
 HB.end.
 
@@ -510,9 +499,6 @@ HB.builders Context D (f : ComCompleteDioid_of_CompleteLattice D).
       D set_mulDl.
 
 HB.end.
-
-HB.structure Definition ComCompleteDioid :=
-  { D of CompleteDioid D & ComCompleteDioid_of_CompleteDioid D }.
 
 Section ComCompleteDioidTheory.
 

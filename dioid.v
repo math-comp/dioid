@@ -201,6 +201,9 @@ HB.mixin Record ComSemiRing_of_SemiRing R of SemiRing R := {
   muldC : @commutative R _ mul;
 }.
 
+HB.structure Definition ComSemiRing :=
+  { R of ComSemiRing_of_SemiRing R & SemiRing R }.
+
 HB.factory Record ComSemiRing_of_WrapChoice R of WrapChoice R := {
   zero : R;
   one : R;
@@ -237,9 +240,6 @@ HB.builders Context R (f : ComSemiRing_of_WrapChoice R).
 
 HB.end.
 
-HB.structure Definition ComSemiRing :=
-  { R of WrapChoice R & ComSemiRing_of_WrapChoice R }.
-
 Coercion ComSemiRing_to_Equality (T : ComSemiRing.type) :=
   Eval hnf in [eqType of T for T].
 Canonical ComSemiRing_to_Equality.
@@ -272,6 +272,9 @@ HB.mixin Record Dioid_of_SemiRing_and_WrapPOrder D
       (Order.POrder.le wrap_porderMixin a b)
       = (Equality.op wrap_eqMixin (add a b) b);
 }.
+
+HB.structure Definition Dioid :=
+  { D of Dioid_of_SemiRing_and_WrapPOrder D & SemiRing D & WrapPOrder D }.
 
 HB.factory Record Dioid_of_WrapPOrder D of WrapPOrder D := {
   zero : D;
@@ -370,9 +373,6 @@ HB.builders Context D (f : Dioid_of_WrapChoice D).
 
 HB.end.
 
-HB.structure Definition Dioid :=
-  { D of WrapChoice D & Dioid_of_WrapChoice D }.
-
 Coercion Dioid_to_Equality (T : Dioid.type) :=
   Eval hnf in [eqType of T for T].
 Canonical Dioid_to_Equality.
@@ -443,34 +443,8 @@ Proof. move=> Hac Hbd; exact/(le_trans (led_mul2r _ Hac)) /led_mul2l. Qed.
 
 End DioidTheory.
 
-HB.factory Record ComDioid_of_Dioid D of Dioid D := {
-  muldC : @commutative D _ mul;
-}.
-
-HB.builders Context D (f : ComDioid_of_Dioid D).
-
-  HB.instance Definition to_ComSemiRing_of_SemiRing :=
-    ComSemiRing_of_SemiRing.Build D muldC.
-
-HB.end.
-
-HB.factory Record ComDioid_of_ComSemiRing_and_WrapPOrder D
-           of ComSemiRing D & WrapPOrder D := {
-  adddd : @idempotent D add;
-  le_def : forall (a b : D),
-      (Order.POrder.le wrap_porderMixin a b)
-      = (Equality.op wrap_eqMixin (add a b) b);
-}.
-
-HB.builders Context D (f : ComDioid_of_ComSemiRing_and_WrapPOrder D).
-
-  HB.instance Definition to_Dioid_of_SemiRing_and_WrapPOrder :=
-    Dioid_of_SemiRing_and_WrapPOrder.Build D adddd le_def.
-
-  HB.instance Definition to_ComDioid_of_Dioid :=
-    ComDioid_of_Dioid.Build D muldC.
-
-HB.end.
+HB.structure Definition ComDioid :=
+  { D of ComSemiRing_of_SemiRing D & Dioid D }.
 
 HB.factory Record ComDioid_of_WrapPOrder D of WrapPOrder D := {
   zero : D;
@@ -509,7 +483,7 @@ HB.builders Context D (f : ComDioid_of_WrapPOrder D).
       muldA mul1d muld1 muldDl muldDr mul0d muld0 le_def.
 
   HB.instance Definition to_ComDioid_of_Dioid :=
-    ComDioid_of_Dioid.Build D muldC.
+    ComSemiRing_of_SemiRing.Build D muldC.
 
 HB.end.
 
@@ -547,12 +521,9 @@ HB.builders Context D (f : ComDioid_of_WrapChoice D).
       muldA mul1d muld1 muldDl muldDr mul0d muld0.
 
   HB.instance Definition to_ComDioid_of_Dioid :=
-    ComDioid_of_Dioid.Build D muldC.
+    ComSemiRing_of_SemiRing.Build D muldC.
 
 HB.end.
-
-HB.structure Definition ComDioid :=
-  { D of WrapChoice D & ComDioid_of_WrapChoice D }.
 
 Coercion ComDioid_to_Equality (T : ComDioid.type) :=
   Eval hnf in [eqType of T for T].
@@ -752,7 +723,7 @@ Notation "[ 'Dioid' 'of' R 'by' <: ]" :=
   (at level 0, format "[ 'Dioid' 'of' R 'by' <: ]") : form_scope.
 
 Notation "[ 'ComDioid' 'of' R 'by' <: ]" :=
-  (ComDioid_of_Dioid.Build _ (comDioidMixin (Phant R) val_inj (rrefl _)))
+  (ComSemiRing_of_SemiRing.Build _ (comDioidMixin (Phant R) val_inj (rrefl _)))
   (at level 0, format "[ 'ComDioid' 'of' R 'by' <: ]") : form_scope.
 
 End Exports.

@@ -61,6 +61,9 @@ HB.mixin Record CompleteLattice_of_WrapLattice T of WrapLattice T := {
   set_join_is_lub : set_f_is_lub wrap_porderMixin set_join;
 }.
 
+HB.structure Definition CompleteLattice :=
+  { T of WrapLattice T & CompleteLattice_of_WrapLattice T }.
+
 HB.factory Record CompleteLattice_of_WrapPOrder T of WrapPOrder T := {
   set_join : set T -> T;
   set_join_is_lub : set_f_is_lub wrap_porderMixin set_join;
@@ -234,9 +237,6 @@ HB.builders Context T (f : CompleteLattice_of_WrapPOrder T).
     CompleteLattice_of_WrapLattice.Build T set_join_is_lub.
 
 HB.end.
-
-HB.structure Definition CompleteLattice :=
-  { T of WrapLattice T & CompleteLattice_of_WrapLattice T }.
 
 Coercion CompleteLattice_to_Equality (T : CompleteLattice.type) :=
   Eval hnf in [eqType of T for T].
