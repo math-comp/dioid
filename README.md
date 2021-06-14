@@ -27,8 +27,8 @@ Dependencies
 
 * Coq (>= 8.13)
 * The Mathcomp library (>= 1.12.0)
-* Hierarchy Builder (>= 1.0.0)
-* Mathcomp Analysis (>= 0.3.5)
+* Hierarchy Builder (= 1.0.0)
+* Mathcomp Analysis (>= 0.3.9)
 
 Dependencies can be installed with OPAM (>= 2.0) by typing:
 

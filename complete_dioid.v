@@ -129,17 +129,18 @@ Proof. by move=> x; rewrite -set_addDl setUT. Qed.
 Lemma add_topd : left_zero (top D) add.
 Proof. by move=> x; rewrite adddC add_dtop. Qed.
 
-Lemma set_add_0 (F : nat -> D) : set_add [set F i | i in 'I_0] = 0.
+Lemma set_add_0 (F : nat -> D) : set_add [set F i | i in [set x | 'I_0 x]] = 0.
 Proof. by rewrite -bottom_zero; apply: f_equal; rewrite -subset0 => x [[]]. Qed.
 
-Lemma set_add_1 (F : nat -> D) : set_add [set F i | i in 'I_1] = F O.
+Lemma set_add_1 (F : nat -> D) : set_add [set F i | i in [set x | 'I_1 x]] = F O.
 Proof.
 rewrite -(addd0 (F O)) -bottom_zero -set_addDl setU0; apply: f_equal.
 by rewrite predeqP => x; split=> [[y] | ->]; [rewrite ord1|exists ord0].
 Qed.
 
 Lemma set_add_S (F : nat -> D) k :
-  set_add [set F i | i in 'I_k.+1] = set_add [set F i | i in 'I_k] + F k.
+  set_add [set F i | i in [set x | 'I_k.+1 x]]
+  = set_add [set F i | i in [set x | 'I_k x]] + F k.
 Proof.
 rewrite adddC -set_addDl; apply: f_equal; rewrite predeqP => x; split.
 - move=> -[i Hi] <-.
@@ -150,10 +151,10 @@ rewrite adddC -set_addDl; apply: f_equal; rewrite predeqP => x; split.
 Qed.
 
 Lemma set_add_led (F : nat -> D) k :
-  set_add [set F i | i in 'I_k] <= set_add [set of F].
+  set_add [set F i | i in [set x | 'I_k x]] <= set_add [set of F].
 Proof.
 elim: k => [|k IHk].
-- set S := mkset _.
+- set S := image _ _.
   have ->: S = set0 by rewrite -subset0 => x [[]].
   exact: bottom_minimum.
 - rewrite set_add_S led_add_eqv IHk /=.
@@ -161,14 +162,16 @@ elim: k => [|k IHk].
 Qed.
 
 Lemma set_add_lim_nat (F : nat -> D) l :
-  (forall k, set_add [set F i | i in 'I_k] <= l) -> set_add [set of F] <= l.
+  (forall k, set_add [set F i | i in [set x | 'I_k x]] <= l) ->
+  set_add [set of F] <= l.
 Proof.
 move=> H; apply: set_join_le_ub => _ [i _ <-].
 by move: (H i.+1); apply/le_trans/set_join_ub; exists ord_max.
 Qed.
 
 Lemma set_add_led_set (F F' : nat -> D) :
-  (forall k, set_add [set F i | i in 'I_k] <= set_add [set F' i | i in 'I_k]) ->
+  (forall k, set_add [set F i | i in [set x | 'I_k x]]
+             <= set_add [set F' i | i in [set x | 'I_k x]]) ->
   set_add [set of F] <= set_add [set of F'].
 Proof.
 move=> H; apply: set_add_lim_nat => k.
@@ -252,7 +255,7 @@ Qed.
 Lemma kleene_1r a : (a + 1) ^* = a ^*.
 Proof.
 apply/le_anti/andP; split; [|exact/kleene_monotony/led_addr].
-suff Hyp : forall i, (a + 1) ^ i = set_add [set a ^ j | j in 'I_i.+1].
+suff Hyp : forall i, (a + 1) ^ i = set_add [set a ^ j | j in [set x | 'I_i.+1 x]].
 { apply: set_add_led_set => k.
   elim: k => [ | k IHk]; [by rewrite set_add_0 le0d|].
   rewrite !set_add_S Hyp.
@@ -272,7 +275,7 @@ rewrite [X in set_join X](_ : _ = a ^ i.+1 |` B'); last first.
     move=> -[[//|j] /andP [Hj Hji] <-]; rewrite expS; exists (a ^ j) => //.
     by move: Hji => /ltnW; rewrite -ltnS => Hji; exists (Ordinal Hji). }
 rewrite -[set_join]/set_add set_addDl.
-rewrite (_ : mkset _ = (1 |` B')); last first.
+rewrite (_ : image _ _ = (1 |` B')); last first.
 { rewrite predeqP => x; split.
   { move=> -[[[|j] Hj] _ <-]; [by left; rewrite exp0|].
     by right; exists (Ordinal Hj). }
@@ -295,7 +298,7 @@ Lemma kleene_sqr a : a^* * a^* = a^*.
 Proof.
 rewrite {1}/op_kleene set_mulDr.
 set B' := (a ^* |` [set of fun i => a ^ i.+1 * a ^*]).
-rewrite (_ : mkset _ = B'); last first.
+rewrite (_ : image _ _ = B'); last first.
 { rewrite predeqP => x; split.
   - by move=> -[_ [[|i] _ <-] <-]; [left; rewrite exp0 mul1d|right; exists i].
   - move=> [-> | [i _ <-]]; [by exists 1; [exists O|rewrite mul1d]|].
@@ -319,7 +322,7 @@ Qed.
 Lemma kleene_kleene a : (a ^*) ^* = a ^*.
 Proof.
 rewrite kleeneSr /op_plus.
-rewrite (_ : mkset _ = a ^* |` set0).
+rewrite (_ : image _ _ = a ^* |` set0).
   by rewrite setU0 /set_add set_join_set1 kleeneSr adddA adddd.
 rewrite predeqP => x; split.
 - move=> [i _ <-]; left; exact: kleene_exp.
