@@ -1,6 +1,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype choice order.
 From mathcomp Require Import fintype ssrnat bigop.
+Require Import mathcomp.analysis.boolp.
 Require Import mathcomp.analysis.classical_sets.
 Require Import HB_wrappers dioid complete_lattice.
 
