@@ -1,7 +1,11 @@
--R . mathcomp.dioid
--arg "-w -notation-overriden,-parsing"
 dioid.v
 complete_lattice.v
 complete_dioid.v
+
+-R . mathcomp.dioid
+
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -redundant-canonical-projection
 
 COQDOCFLAGS = "-g -interpolate -utf8 --external https://math-comp.github.io/htmldoc/ mathcomp -R . mathcomp.dioid"
