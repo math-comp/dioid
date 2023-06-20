@@ -4,18 +4,20 @@ Definitions of the algebraic structure of dioid following the style of
 ssralg in the Mathcomp library.
 
 The main algebraic structures defined are:
-* semirigns: rings without oppositve for the additive law
 * dioids: idempotent semirings (i.e., forall x, x + x = x)
 * complete dioids: dioids whose canonical order (x <= y wen x + y = y)
   yields a compelete lattice
 * commutative variants (multiplicative law is commutative)
 
-More details can be found in comments at the beginning of each file.
+More details can be found in comments at the beginning of each .v file.
 
 Installation
 ------------
 
-This is available as an OPAM (>= 2.0) package:
+This is currently not available as an OPAM (>= 2.0) package:
+
+When MathComp Analysis for MathComp 2 will be released, this will be
+installable by typing:
 
 ```
 % opam repo add coq-released https://coq.inria.fr/opam/released
@@ -25,16 +27,26 @@ This is available as an OPAM (>= 2.0) package:
 Dependencies
 ------------
 
-* Coq (>= 8.13)
-* The Mathcomp library (>= 1.12.0)
-* Hierarchy Builder (= 1.0.0)
-* Mathcomp Analysis (>= 0.3.9)
+* Coq (>= 8.16)
+* The Mathcomp library (>= 2.0.0)
+* Hierarchy Builder (= 1.4.0)
+* Mathcomp Analysis (hierarchy-builder branch)
 
 Dependencies can be installed with OPAM (>= 2.0) by typing:
 
 ```
 % opam repo add coq-released https://coq.inria.fr/opam/released
-% opam install coq-mathcomp-ssreflect.1.12.0 coq-hierarchy-builder.1.0.0 coq-mathcomp-analysis.0.3.5
+% opam install coq-mathcomp-algebra.2.0.0
+```
+
+Except MathComp Analysis (or only its mathcomp-classical package) that
+must currently be installed from source:
+
+```
+% git clone https://github.com/math-comp/analysis
+% git checkout hierarchy-builder
+% make -j4 -C classical
+% make -C classical install
 ```
 
 Compilation

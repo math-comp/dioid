@@ -464,8 +464,8 @@ Lemma omorphI : Order.meet_morphism f.
 Proof. by move=> x y; rewrite -!set_meet2 omorphSM !image_setU !image_set1. Qed.
 HB.instance Definition _ := Order.isMeetLatticeMorphism.Build d L d' L' f
   omorphI.
-Lemma omorph1 : f 1 = 1.
-Proof. by rewrite -[1 in LHS]set_meet0 omorphSM image_set0 set_meet0. Qed.
+Lemma omorph1 : f \top = \top.
+Proof. by rewrite -[\top in LHS]set_meet0 omorphSM image_set0 set_meet0. Qed.
 HB.instance Definition _ := Order.isTLatticeMorphism.Build d L d' L' f omorph1.
 HB.instance Definition _ := isSetMeetMorphism.Build d L d' L' f omorphSM.
 HB.end.
@@ -481,8 +481,8 @@ Lemma omorphU : Order.join_morphism f.
 Proof. by move=> x y; rewrite -!set_join2 omorphSJ !image_setU !image_set1. Qed.
 HB.instance Definition _ := Order.isJoinLatticeMorphism.Build d L d' L' f
   omorphU.
-Lemma omorph0 : f 0 = 0.
-Proof. by rewrite -[0 in LHS]set_join0 omorphSJ image_set0 set_join0. Qed.
+Lemma omorph0 : f \bot = \bot.
+Proof. by rewrite -[\bot in LHS]set_join0 omorphSJ image_set0 set_join0. Qed.
 HB.instance Definition _ := Order.isBLatticeMorphism.Build d L d' L' f omorph0.
 HB.instance Definition _ := isSetJoinMorphism.Build d L d' L' f omorphSJ.
 HB.end.
@@ -613,7 +613,7 @@ HB.factory Record isMeetCompleteLatticeClosed d (T : completeLatticeType d)
 }.
 
 HB.builders Context d T S of isMeetCompleteLatticeClosed d T S.
-Lemma opred1 : 1 \in S. Proof. by rewrite -set_meet0 opredSM. Qed.
+Lemma opred1 : \top \in S. Proof. by rewrite -set_meet0 opredSM. Qed.
 HB.instance Definition _ := Order.isTLatticeClosed.Build d T S opred1.
 Lemma opredI : meet_closed S.
 Proof. by move=> x y xS yS; rewrite -set_meet2 opredSM// => _ [] ->. Qed.
@@ -627,7 +627,7 @@ HB.factory Record isJoinCompleteLatticeClosed d (T : completeLatticeType d)
 }.
 
 HB.builders Context d T S of isJoinCompleteLatticeClosed d T S.
-Lemma opred0 : 0 \in S. Proof. by rewrite -set_join0 opredSJ. Qed.
+Lemma opred0 : \bot \in S. Proof. by rewrite -set_join0 opredSJ. Qed.
 HB.instance Definition _ := Order.isBLatticeClosed.Build d T S opred0.
 Lemma opredU : join_closed S.
 Proof. by move=> x y xS yS; rewrite -set_join2 opredSJ// => _ [] ->. Qed.
@@ -650,12 +650,12 @@ Arguments opredSM {d T} _.
 Arguments opredSJ {d T} _.
 
 HB.mixin Record isMeetSubCompleteLattice d (T : completeLatticeType d)
-    (S : pred T) d' U of Sub T S U & CompleteLattice d' U := {
+    (S : pred T) d' U of SubType T S U & CompleteLattice d' U := {
   valSM_subproof : set_meet_morphism (val : U -> T);
 }.
 
 HB.mixin Record isJoinSubCompleteLattice d (T : completeLatticeType d)
-    (S : pred T) d' U of Sub T S U & CompleteLattice d' U := {
+    (S : pred T) d' U of SubType T S U & CompleteLattice d' U := {
   valSJ_subproof : set_join_morphism (val : U -> T);
 }.
 
@@ -718,7 +718,7 @@ Qed.
 HB.instance Definition _ := POrder_isMeetCompleteLattice.Build d' U
   set_meetU_is_glb.
 
-Lemma val1 : (val : U -> T) 1 = 1.
+Lemma val1 : (val : U -> T) \top = \top.
 Proof. by rewrite subK image_set0 set_meet0. Qed.
 HB.instance Definition _ := Order.isTSubLattice.Build d T S d' U val1.
 
@@ -770,7 +770,7 @@ Qed.
 HB.instance Definition _ := POrder_isJoinCompleteLattice.Build d' U
   set_joinU_is_lub.
 
-Lemma val0 : (val : U -> T) 0 = 0.
+Lemma val0 : (val : U -> T) \bot = \bot.
 Proof. by rewrite subK image_set0 set_join0. Qed.
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
@@ -835,11 +835,11 @@ Qed.
 HB.instance Definition _ := POrder_isCompleteLattice.Build d' U
   set_meetU_is_glb set_joinU_is_lub.
 
-Lemma val0 : (val : U -> T) 0 = 0.
+Lemma val0 : (val : U -> T) \bot = \bot.
 Proof. by rewrite subK image_set0 set_join0. Qed.
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
-Lemma val1 : (val : U -> T) 1 = 1.
+Lemma val1 : (val : U -> T) \top = \top.
 Proof. by rewrite subK image_set0 set_meet0. Qed.
 HB.instance Definition _ := Order.isTSubLattice.Build d T S d' U val1.
 

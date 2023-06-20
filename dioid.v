@@ -150,7 +150,7 @@ move=> a b c; rewrite /le_dioid => /eqP baa /eqP <-.
 by rewrite -[in X in _ == X]baa addrA.
 Qed.
 
-HB.instance Definition _ := Order.isLePOrdered.Build d D
+HB.instance Definition _ := Order.Le_isPOrder.Build d D
   le_refl_dioid le_anti_dioid le_trans_dioid.
 
 Lemma le_def (a b : D) : (a <= b) = (a + b == b).
