@@ -435,19 +435,16 @@ HB.mixin Record isSetJoinMorphism d (L : completeLatticeType d)
   omorphSJ : set_join_morphism apply;
 }.
 
-#[infer(L,L')]
 HB.structure Definition MeetCompleteLatticeMorphism
     d (L : completeLatticeType d) d' (L' : completeLatticeType d') :=
   {f of isSetMeetMorphism d L d' L' f & @Order.MeetLatticeMorphism d L d' L' f
    & @Order.TLatticeMorphism d L d' L' f}.
 
-#[infer(L,L')]
 HB.structure Definition JoinCompleteLatticeMorphism
     d (L : completeLatticeType d) d' (L' : completeLatticeType d') :=
   {f of isSetJoinMorphism d L d' L' f & @Order.JoinLatticeMorphism d L d' L' f
    & @Order.BLatticeMorphism d L d' L' f}.
 
-#[infer(L,L')]
 HB.structure Definition CompleteLatticeMorphism
     d (L : completeLatticeType d) d' (L' : completeLatticeType d') :=
   {f of @MeetCompleteLatticeMorphism d L d' L' f
@@ -502,11 +499,11 @@ HB.instance Definition _ := isJoinCompleteLatticeMorphism.Build d L d' L' f
 HB.end.
 
 Notation "{ 'mclmorphism' T -> T' }" :=
-  (MeetCompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
+  (@MeetCompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
 Notation "{ 'jclmorphism' T -> T' }" :=
-  (JoinCompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
+  (@JoinCompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
 Notation "{ 'clmorphism' T -> T' }" :=
-  (CompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
+  (@CompleteLatticeMorphism.type _ T%type _ T'%type) : type_scope.
 Notation "[ 'mclmorphism' 'of' f 'as' g ]" :=
   (MeetCompleteLatticeMorphism.clone _ _ _ _ f%function g)
   (at level 0, format "[ 'mclmorphism'  'of'  f  'as'  g ]") : form_scope.
@@ -593,15 +590,15 @@ HB.mixin Record isSetJoinClosed d (T : completeLatticeType d)
 
 (* Structures for stability properties *)
 
-#[infer(T), short(type="meetCompleteLatticeClosed")]
+#[short(type="meetCompleteLatticeClosed")]
 HB.structure Definition MeetCompleteLatticeClosed d T :=
   {S of isSetMeetClosed d T S & @Order.TMeetLatticeClosed d T S}.
 
-#[infer(T), short(type="joinCompleteLatticeClosed")]
+#[short(type="joinCompleteLatticeClosed")]
 HB.structure Definition JoinCompleteLatticeClosed d T :=
   {S of isSetJoinClosed d T S & @Order.BJoinLatticeClosed d T S}.
 
-#[infer(T), short(type="completeLatticeClosed")]
+#[short(type="completeLatticeClosed")]
 HB.structure Definition CompleteLatticeClosed d T :=
   {S of @MeetCompleteLatticeClosed d T S & @JoinCompleteLatticeClosed d T S}.
 
