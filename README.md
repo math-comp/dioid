@@ -12,41 +12,21 @@ The main algebraic structures defined are:
 More details can be found in comments at the beginning of each .v file.
 
 Installation
-------------
-
-This is currently not available as an OPAM (>= 2.0) package:
-
-When MathComp Analysis for MathComp 2 will be released, this will be
-installable by typing:
-
-```
-% opam repo add coq-released https://coq.inria.fr/opam/released
-% opam install coq-mathcomp-dioid
-```
+============
 
 Dependencies
 ------------
 
-* Coq (>= 8.16)
-* The Mathcomp library (>= 2.0.0)
-* Hierarchy Builder (= 1.4.0)
-* Mathcomp Analysis (hierarchy-builder branch)
+* Coq (>= 8.20)
+* The Mathcomp library (>= 2.3.0)
+* Hierarchy Builder (= 1.8.0)
+* Mathcomp classical (= 1.8.0)
 
 Dependencies can be installed with OPAM (>= 2.0) by typing:
 
 ```
 % opam repo add coq-released https://coq.inria.fr/opam/released
-% opam install coq-mathcomp-algebra.2.0.0
-```
-
-Except MathComp Analysis (or only its mathcomp-classical package) that
-must currently be installed from source:
-
-```
-% git clone https://github.com/math-comp/analysis
-% git checkout hierarchy-builder
-% make -j4 -C classical
-% make -C classical install
+% opam install coq.8.20.1 coq-mathcomp-algebra.2.3.0 coq-mathcomp-classical.1.8.0
 ```
 
 Compilation
@@ -56,4 +36,5 @@ Just type
 
 ```
 % make
+% make install
 ```

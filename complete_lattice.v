@@ -263,7 +263,7 @@ HB.end.
 
 Section CompleteLatticeTheory.
 
-Variables (d : unit) (L : completeLatticeType d).
+Variables (d : Order.disp_t) (L : completeLatticeType d).
 
 Implicit Types S : set L.
 Implicit Types x : L.
@@ -355,16 +355,16 @@ move=> xmS xmS'; apply: set_meet_ge_lb => y [] Sy.
 - exact/(le_trans xmS')/set_meet_lb.
 Qed.
 
-Lemma set_joinT : set_join setT = 1%O :> L.
+Lemma set_joinT : set_join setT = \top :> L.
 Proof. by apply/le_anti; rewrite lex1 set_join_ub. Qed.
 
-Lemma set_join0 : set_join set0 = 0%O :> L.
+Lemma set_join0 : set_join set0 = \bot :> L.
 Proof. by apply/le_anti; rewrite le0x set_join_le_ub. Qed.
 
-Lemma set_meetT : set_meet setT = 0%O :> L.
+Lemma set_meetT : set_meet setT = \bot :> L.
 Proof. by apply/le_anti; rewrite le0x set_meet_lb. Qed.
 
-Lemma set_meet0 : set_meet set0 = 1%O :> L.
+Lemma set_meet0 : set_meet set0 = \top :> L.
 Proof. by apply/le_anti; rewrite lex1 set_meet_ge_lb. Qed.
 
 Lemma set_join2 x y : set_join [set x; y] = x `|` y.
@@ -530,9 +530,9 @@ Section CompleteLatticeMorphismTheory.
 
 Section IdCompFun.
 
-Variables (d : unit) (T : completeLatticeType d).
-Variables (d' : unit) (T' : completeLatticeType d').
-Variables (d'' : unit) (T'' : completeLatticeType d'').
+Variables (d : Order.disp_t) (T : completeLatticeType d).
+Variables (d' : Order.disp_t) (T' : completeLatticeType d').
+Variables (d'' : Order.disp_t) (T'' : completeLatticeType d'').
 
 Section MeetCompFun.
 
@@ -679,13 +679,13 @@ HB.structure Definition SubCompleteLattice d (T : completeLatticeType d) S
     & @JoinSubCompleteLattice d T S d' U }.
 
 #[export]
-HB.instance Definition _ (d : unit) (T : completeLatticeType d) (S : pred T)
-    d' (U : MeetSubCompleteLattice.type S d') :=
+HB.instance Definition _ (d : Order.disp_t) (T : completeLatticeType d)
+    (S : pred T) d' (U : MeetSubCompleteLattice.type S d') :=
   isMeetCompleteLatticeMorphism.Build d' U d T val valSM_subproof.
 
 #[export]
-HB.instance Definition _ (d : unit) (T : completeLatticeType d) (S : pred T)
-    d' (U : JoinSubCompleteLattice.type S d') :=
+HB.instance Definition _ (d : Order.disp_t) (T : completeLatticeType d)
+    (S : pred T) d' (U : JoinSubCompleteLattice.type S d') :=
   isJoinCompleteLatticeMorphism.Build d' U d T val valSJ_subproof.
 
 HB.factory Record SubPOrder_isMeetSubCompleteLattice d
@@ -701,14 +701,14 @@ HB.instance Definition _ := isMeetCompleteLatticeClosed.Build d T S
 Lemma opredSM (B : set U) : set_meet (val @` B) \in S.
 Proof. by apply: opredSM => _ [y By] <- /=; apply: valP. Qed.
 
-Let inU v Sv : U := eqtype.sub v Sv.
+Let inU v Sv : U := eqtype.Sub v Sv.
 Let set_meetU (B : set U) := inU (opredSM B).
 
 Lemma set_meetU_is_glb : set_f_is_glb set_meetU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub subK set_meet_lb//; exists x.
-- move=> x ubx; rewrite leEsub subK set_meet_ge_lb// => _ [y By <-].
+- by move=> x Bx; rewrite leEsub SubK set_meet_lb//; exists x.
+- move=> x ubx; rewrite leEsub SubK set_meet_ge_lb// => _ [y By <-].
   by rewrite -leEsub ubx.
 Qed.
 
@@ -716,21 +716,21 @@ HB.instance Definition _ := POrder_isMeetCompleteLattice.Build d' U
   set_meetU_is_glb.
 
 Lemma val1 : (val : U -> T) \top = \top.
-Proof. by rewrite subK image_set0 set_meet0. Qed.
+Proof. by rewrite SubK image_set0 set_meet0. Qed.
 HB.instance Definition _ := Order.isTSubLattice.Build d T S d' U val1.
 
 Lemma valI : Order.meet_morphism (val : U -> T).
-Proof. by move=> x y; rewrite subK !image_setU !image_set1 set_meet2. Qed.
+Proof. by move=> x y; rewrite SubK !image_setU !image_set1 set_meet2. Qed.
 HB.instance Definition _ := Order.isMeetSubLattice.Build d T S d' U valI.
 
 Lemma valSM : set_meet_morphism (val : U -> T).
-Proof. by move=> B; rewrite subK. Qed.
+Proof. by move=> B; rewrite SubK. Qed.
 HB.instance Definition _ := isMeetSubCompleteLattice.Build d T S d' U valSM.
 
 HB.end.
 
 HB.factory Record SubChoice_isMeetSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : unit) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
   opredSM_subproof : set_meet_closed S;
 }.
 
@@ -753,14 +753,14 @@ HB.instance Definition _ := isJoinCompleteLatticeClosed.Build d T S
 Lemma opredSJ (B : set U) : set_join (val @` B) \in S.
 Proof. by apply: opredSJ => _ [y By] <- /=; apply: valP. Qed.
 
-Let inU v Sv : U := eqtype.sub v Sv.
+Let inU v Sv : U := eqtype.Sub v Sv.
 Let set_joinU (B : set U) := inU (opredSJ B).
 
 Lemma set_joinU_is_lub : set_f_is_lub set_joinU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub subK set_join_ub//; exists x.
-- move=> x ubx; rewrite leEsub subK set_join_le_ub// => _ [y By <-].
+- by move=> x Bx; rewrite leEsub SubK set_join_ub//; exists x.
+- move=> x ubx; rewrite leEsub SubK set_join_le_ub// => _ [y By <-].
   by rewrite -leEsub ubx.
 Qed.
 
@@ -768,21 +768,21 @@ HB.instance Definition _ := POrder_isJoinCompleteLattice.Build d' U
   set_joinU_is_lub.
 
 Lemma val0 : (val : U -> T) \bot = \bot.
-Proof. by rewrite subK image_set0 set_join0. Qed.
+Proof. by rewrite SubK image_set0 set_join0. Qed.
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
 Lemma valU : Order.join_morphism (val : U -> T).
-Proof. by move=> x y; rewrite subK !image_setU !image_set1 set_join2. Qed.
+Proof. by move=> x y; rewrite SubK !image_setU !image_set1 set_join2. Qed.
 HB.instance Definition _ := Order.isJoinSubLattice.Build d T S d' U valU.
 
 Lemma valSJ : set_join_morphism (val : U -> T).
-Proof. by move=> B; rewrite subK. Qed.
+Proof. by move=> B; rewrite SubK. Qed.
 HB.instance Definition _ := isJoinSubCompleteLattice.Build d T S d' U valSJ.
 
 HB.end.
 
 HB.factory Record SubChoice_isJoinSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : unit) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
   opredSJ_subproof : set_join_closed S;
 }.
 
@@ -809,23 +809,23 @@ Proof. by apply: opredSM => _ [y By] <- /=; apply: valP. Qed.
 Lemma opredSJ (B : set U) : set_join (val @` B) \in S.
 Proof. by apply: opredSJ => _ [y By] <- /=; apply: valP. Qed.
 
-Let inU v Sv : U := eqtype.sub v Sv.
+Let inU v Sv : U := eqtype.Sub v Sv.
 Let set_meetU (B : set U) := inU (opredSM B).
 Let set_joinU (B : set U) := inU (opredSJ B).
 
 Lemma set_meetU_is_glb : set_f_is_glb set_meetU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub subK set_meet_lb//; exists x.
-- move=> x lbx; rewrite leEsub subK set_meet_ge_lb// => _ [y By <-].
+- by move=> x Bx; rewrite leEsub SubK set_meet_lb//; exists x.
+- move=> x lbx; rewrite leEsub SubK set_meet_ge_lb// => _ [y By <-].
   by rewrite -leEsub lbx.
 Qed.
 
 Lemma set_joinU_is_lub : set_f_is_lub set_joinU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub subK set_join_ub//; exists x.
-- move=> x ubx; rewrite leEsub subK set_join_le_ub// => _ [y By <-].
+- by move=> x Bx; rewrite leEsub SubK set_join_ub//; exists x.
+- move=> x ubx; rewrite leEsub SubK set_join_le_ub// => _ [y By <-].
   by rewrite -leEsub ubx.
 Qed.
 
@@ -833,33 +833,33 @@ HB.instance Definition _ := POrder_isCompleteLattice.Build d' U
   set_meetU_is_glb set_joinU_is_lub.
 
 Lemma val0 : (val : U -> T) \bot = \bot.
-Proof. by rewrite subK image_set0 set_join0. Qed.
+Proof. by rewrite SubK image_set0 set_join0. Qed.
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
 Lemma val1 : (val : U -> T) \top = \top.
-Proof. by rewrite subK image_set0 set_meet0. Qed.
+Proof. by rewrite SubK image_set0 set_meet0. Qed.
 HB.instance Definition _ := Order.isTSubLattice.Build d T S d' U val1.
 
 Lemma valI : Order.meet_morphism (val : U -> T).
-Proof. by move=> x y; rewrite subK !image_setU !image_set1 set_meet2. Qed.
+Proof. by move=> x y; rewrite SubK !image_setU !image_set1 set_meet2. Qed.
 HB.instance Definition _ := Order.isMeetSubLattice.Build d T S d' U valI.
 
 Lemma valU : Order.join_morphism (val : U -> T).
-Proof. by move=> x y; rewrite subK !image_setU !image_set1 set_join2. Qed.
+Proof. by move=> x y; rewrite SubK !image_setU !image_set1 set_join2. Qed.
 HB.instance Definition _ := Order.isJoinSubLattice.Build d T S d' U valU.
 
 Lemma valSM : set_meet_morphism (val : U -> T).
-Proof. by move=> B; rewrite subK. Qed.
+Proof. by move=> B; rewrite SubK. Qed.
 HB.instance Definition _ := isMeetSubCompleteLattice.Build d T S d' U valSM.
 
 Lemma valSJ : set_join_morphism (val : U -> T).
-Proof. by move=> B; rewrite subK. Qed.
+Proof. by move=> B; rewrite SubK. Qed.
 HB.instance Definition _ := isJoinSubCompleteLattice.Build d T S d' U valSJ.
 
 HB.end.
 
 HB.factory Record SubChoice_isSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : unit) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.

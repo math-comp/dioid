@@ -123,7 +123,7 @@ HB.instance Definition _ := GRing.isSemiRing.Build D addA addC add0d
 HB.instance Definition _ := SemiRing_POrder_isDioid.Build d D adddd le_def.
 HB.end.
 
-HB.factory Record SemiRing_isDioid (d : unit) D of GRing.SemiRing D := {
+HB.factory Record SemiRing_isDioid (d : Order.disp_t) D of GRing.SemiRing D := {
   adddd : @idempotent D +%R;
 }.
 
@@ -160,7 +160,7 @@ HB.instance Definition _ := SemiRing_POrder_isDioid.Build d D adddd le_def.
 
 HB.end.
 
-HB.factory Record Choice_isDioid (d : unit) D of Choice D := {
+HB.factory Record Choice_isDioid (d : Order.disp_t) D of Choice D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -187,7 +187,7 @@ HB.end.
 
 Section DioidTheory.
 
-Variables (disp : unit) (D : dioidType disp).
+Variables (disp : Order.disp_t) (D : dioidType disp).
 
 Implicit Type a b c : D.
 
@@ -269,7 +269,7 @@ HB.instance Definition _ := GRing.SemiRing_hasCommutativeMul.Build D mulC.
 
 HB.end.
 
-HB.factory Record Choice_isComDioid (d : unit) D of Choice D := {
+HB.factory Record Choice_isComDioid (d : Order.disp_t) D of Choice D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -305,7 +305,7 @@ HB.instance Definition _ := GRing.SemiRing_hasCommutativeMul.Build D mulC.
 HB.end.
 
 #[short(type="subDioidType")]
-HB.structure Definition SubDioid d (D : dioidType d) (S : pred D) (d' : unit) :=
+HB.structure Definition SubDioid d (D : dioidType d) (S : pred D) d' :=
   { U of GRing.SubSemiRing D S U & @Order.SubPOrder d D S d' U & Dioid d' U }.
 
 #[short(type="subDioidLatticeType")]
@@ -335,8 +335,8 @@ Proof. by rewrite leEsub le_def -rmorphD /= (inj_eq val_inj). Qed.
 HB.instance Definition _ := SemiRing_POrder_isDioid.Build d' U adddd le_def.
 HB.end.
 
-HB.factory Record SubChoice_isSubDioid d (D : dioidType d) S (d' : unit) U
-    of SubChoice D S U := {
+HB.factory Record SubChoice_isSubDioid d (D : dioidType d) S (d' : Order.disp_t)
+    U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
 }.
 
@@ -353,16 +353,16 @@ HB.structure Definition SubComDioid d (D : comDioidType d) (S : pred D) d' :=
   {U of @SubDioid d D S d' U & ComDioid d' U}.
 
 HB.factory Record SubComSemiRing_SubPOrder_isSubComDioid d (D : comDioidType d)
-  S (d' : unit) U of GRing.SubComSemiRing D S U & @Order.SubPOrder d D S d' U :=
-  {}.
+  S (d' : Order.disp_t) U of GRing.SubComSemiRing D S U & @Order.SubPOrder d D S
+  d' U := {}.
 
 HB.builders Context d D S d' U
   of SubComSemiRing_SubPOrder_isSubComDioid d D S d' U.
 HB.instance Definition _ := SubSemiRing_SubPOrder_isSubDioid.Build d D S d' U.
 HB.end.
 
-HB.factory Record SubChoice_isSubComDioid d (D : comDioidType d) S (d' : unit) U
-    of SubChoice D S U := {
+HB.factory Record SubChoice_isSubComDioid d (D : comDioidType d) S
+    (d' : Order.disp_t) U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S
 }.
 
@@ -412,7 +412,7 @@ Notation "[ 'SubChoice_isSubComDioid' 'of' U 'by' <: 'with' disp ]" :=
 (* Testing subtype hierarchy
 Section Test0.
 
-Variables (d : unit) (T : choiceType) (S : {pred T}).
+Variables (d : Order.disp_t) (T : choiceType) (S : {pred T}).
 
 Inductive B := mkB x & x \in S.
 Definition vB u := let: mkB x _ := u in x.
@@ -424,7 +424,7 @@ End Test0.
 
 Section Test1.
 
-Variables (d : unit) (R : dioidType d) (S : semiringClosed R).
+Variables (d : Order.disp_t) (R : dioidType d) (S : semiringClosed R).
 
 HB.instance Definition _ := [SubChoice_isSubDioid of B S by <: with tt].
 
@@ -432,7 +432,7 @@ End Test1.
 
 Section Test2.
 
-Variables (d : unit) (R : comDioidType d) (S : semiringClosed R).
+Variables (d : Order.disp_t) (R : comDioidType d) (S : semiringClosed R).
 
 HB.instance Definition _ := [SubChoice_isSubComDioid of B S by <: with tt].
 

@@ -85,14 +85,14 @@ HB.structure Definition CompleteDioid d :=
 
 Section CompleteDioidTheory.
 
-Variables (disp : unit) (D : completeDioidType disp).
+Variables (disp : Order.disp_t) (D : completeDioidType disp).
 
 Implicit Types a b c : D.
 Implicit Types B : set D.
 
 Notation set_add := set_join.
 
-Lemma bottom_zero : 0%O = 0%R :> D.
+Lemma bottom_zero : \bot = 0%R :> D.
 Proof. by apply/le_anti; rewrite le0x le0d. Qed.
 
 Lemma set_addDl a B : set_add (a |` B) = a + set_add B.
@@ -109,10 +109,10 @@ Proof. by rewrite -[in LHS](set_join1 b) -set_addDl set_joinU !set_join1. Qed.
 Lemma set_addU A B : set_add (A `|` B) = set_add A + set_add B.
 Proof. by rewrite set_joinU add_join. Qed.
 
-Lemma add_d1 : @right_zero D D 1%O +%R.
+Lemma add_d1 : @right_zero D D \top +%R.
 Proof. by move=> x; apply/eqP; rewrite -le_def lex1. Qed.
 
-Lemma add_1d : @left_zero D D 1%O +%R.
+Lemma add_1d : @left_zero D D \top +%R.
 Proof. by move=> x; rewrite addrC add_d1. Qed.
 
 Lemma set_add0 (F : nat -> D) : set_add [set F i | i in [set x | 'I_0 x]] = 0%R.
@@ -353,7 +353,7 @@ apply/idP/idP => H; [exact: set_join_ub|].
 by move: (div_mul_le b a); apply/le_trans/led_mul2r.
 Qed.
 
-Lemma div_top x : 1%O / x = 1%O.
+Lemma div_top x : \top / x = \top.
 Proof. apply/le_anti /andP; split; [|rewrite -mul_div_equiv]; exact: lex1. Qed.
 
 Lemma led_divl a b c : a <= b -> a / c <= b / c.
@@ -482,7 +482,7 @@ HB.end.
 
 Section ComCompleteDioidTheory.
 
-Variables (disp : unit) (D : comCompleteDioidType disp).
+Variables (disp : Order.disp_t) (D : comCompleteDioidType disp).
 
 Implicit Types a b : D.
 
@@ -586,7 +586,7 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isJoinSubCompleteDioid d (D : completeDioidType d)
-    S (d' : unit) U of SubChoice D S U := {
+    S (d' : Order.disp_t) U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
@@ -598,8 +598,8 @@ HB.instance Definition _ :=
   SubDioid_SubPOrder_isJoinSubCompleteDioid.Build d D S d' U opredSJ_subproof.
 HB.end.
 
-HB.factory Record SubChoice_isJoinSubComCompleteDioid
-    d (D : comCompleteDioidType d) S (d' : unit) U of SubChoice D S U := {
+HB.factory Record SubChoice_isJoinSubComCompleteDioid d
+    (D : comCompleteDioidType d) S (d' : Order.disp_t) U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
@@ -648,7 +648,7 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isSubCompleteDioid d (D : completeDioidType d) S
-    (d' : unit) U of SubChoice D S U := {
+    (d' : Order.disp_t) U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
@@ -662,8 +662,8 @@ HB.instance Definition _ :=
     opredSM_subproof opredSJ_subproof.
 HB.end.
 
-HB.factory Record SubChoice_isSubComCompleteDioid
-    d (D : comCompleteDioidType d) S (d' : unit) U of SubChoice D S U := {
+HB.factory Record SubChoice_isSubComCompleteDioid d
+    (D : comCompleteDioidType d) S (d' : Order.disp_t) U of SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
@@ -746,7 +746,7 @@ Notation "[ 'SubChoice_isSubComCompleteDioid' 'of' U 'by' <: 'with' disp ]" :=
 (* Testing subtype hierarchy
 Section Test0.
 
-Variables (d : unit) (T : choiceType) (S : {pred T}).
+Variables (d : Order.disp_t) (T : choiceType) (S : {pred T}).
 
 Inductive B := mkB x & x \in S.
 Definition vB u := let: mkB x _ := u in x.
@@ -759,7 +759,7 @@ End Test0.
 Module Test1.
 Section Test1.
 
-Variables (d : unit) (D : completeDioidType d) (S : semiringClosed D).
+Variables (d : Order.disp_t) (D : completeDioidType d) (S : semiringClosed D).
 Hypothesis SSJ : set_join_closed S.
 
 HB.instance Definition _ := isJoinCompleteLatticeClosed.Build d D S SSJ.
@@ -773,7 +773,7 @@ End Test1.
 Module Test2.
 Section Test2.
 
-Variables (d : unit) (D : completeDioidType d) (S : semiringClosed D).
+Variables (d : Order.disp_t) (D : completeDioidType d) (S : semiringClosed D).
 Hypothesis SSM : set_meet_closed S.
 Hypothesis SSJ : set_join_closed S.
 
@@ -787,7 +787,7 @@ End Test2.
 Module Test3.
 Section Test3.
 
-Variables (d : unit) (D : comCompleteDioidType d) (S : semiringClosed D).
+Variables (d : Order.disp_t) (D : comCompleteDioidType d) (S : semiringClosed D).
 Hypothesis SSJ : set_join_closed S.
 
 HB.instance Definition _ := isJoinCompleteLatticeClosed.Build d D S SSJ.
