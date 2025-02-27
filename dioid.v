@@ -73,7 +73,7 @@ Import Order.Theory GRing.Theory.
 
 HB.mixin Record SemiRing_POrder_isDioid d D
     of GRing.SemiRing D & Order.POrder d D := {
-  adddd : @idempotent D +%R;
+  adddd : @idempotent_op D +%R;
   le_def : forall (a b : D), (a <= b) = (a + b == b);
 }.
 
@@ -105,7 +105,7 @@ HB.factory Record POrder_isDioid d D of Order.POrder d D := {
   addA : associative add;
   addC : commutative add;
   add0d : left_id zero add;
-  adddd : idempotent add;
+  adddd : idempotent_op add;
   mulA : associative mul;
   mul1d : left_id one mul;
   muld1 : right_id one mul;
@@ -124,7 +124,7 @@ HB.instance Definition _ := SemiRing_POrder_isDioid.Build d D adddd le_def.
 HB.end.
 
 HB.factory Record SemiRing_isDioid (d : Order.disp_t) D of GRing.SemiRing D := {
-  adddd : @idempotent D +%R;
+  adddd : @idempotent_op D +%R;
 }.
 
 HB.builders Context d D of SemiRing_isDioid d D.
@@ -168,7 +168,7 @@ HB.factory Record Choice_isDioid (d : Order.disp_t) D of Choice D := {
   addA : associative add;
   addC : commutative add;
   add0d : left_id zero add;
-  adddd : idempotent add;
+  adddd : idempotent_op add;
   mulA : associative mul;
   mul1d : left_id one mul;
   muld1 : right_id one mul;
@@ -241,7 +241,7 @@ HB.factory Record POrder_isComDioid d D of Order.POrder d D := {
   addA : associative add;
   addC : commutative add;
   add0d : left_id zero add;
-  adddd : idempotent add;
+  adddd : idempotent_op add;
   mulA : associative mul;
   mulC : commutative mul;
   mul1d : left_id one mul;
@@ -277,7 +277,7 @@ HB.factory Record Choice_isComDioid (d : Order.disp_t) D of Choice D := {
   addA : associative add;
   addC : commutative add;
   add0d : left_id zero add;
-  adddd : idempotent add;
+  adddd : idempotent_op add;
   mulA : associative mul;
   mulC : commutative mul;
   mul1d : left_id one mul;
@@ -328,10 +328,10 @@ HB.factory Record SubSemiRing_SubPOrder_isSubDioid d (D : dioidType d) S d' U
     of GRing.SubSemiRing D S U & @Order.SubPOrder d D S d' U := {}.
 
 HB.builders Context d D S d' U of SubSemiRing_SubPOrder_isSubDioid d D S d' U.
-Lemma adddd : @idempotent U +%R.
+Lemma adddd : @idempotent_op U +%R.
 Proof. by move=> x; apply: val_inj; rewrite raddfD adddd. Qed.
 Lemma le_def (a b : U) : (a <= b) = (a + b == b).
-Proof. by rewrite leEsub le_def -rmorphD /= (inj_eq val_inj). Qed.
+Proof. by rewrite -Order.le_val le_def -rmorphD /= (inj_eq val_inj). Qed.
 HB.instance Definition _ := SemiRing_POrder_isDioid.Build d' U adddd le_def.
 HB.end.
 

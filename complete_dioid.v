@@ -462,7 +462,7 @@ HB.factory Record CompleteLattice_isComCompleteDioid d D
   addA : associative add;
   addC : commutative add;
   add0d : left_id zero add;
-  adddd : idempotent add;
+  adddd : idempotent_op add;
   mulA : associative mul;
   mulC : commutative mul;
   mul1d : left_id one mul;

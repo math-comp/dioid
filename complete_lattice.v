@@ -43,6 +43,8 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
 Import Order.Theory.
+(* remove below line when requireing mathcomp >= 2.4.0 *)
+Local Notation le_val := Order.le_val.
 
 Local Open Scope classical_set_scope.
 Local Open Scope order_scope.
@@ -707,9 +709,9 @@ Let set_meetU (B : set U) := inU (opredSM B).
 Lemma set_meetU_is_glb : set_f_is_glb set_meetU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub SubK set_meet_lb//; exists x.
-- move=> x ubx; rewrite leEsub SubK set_meet_ge_lb// => _ [y By <-].
-  by rewrite -leEsub ubx.
+- by move=> x Bx; rewrite -le_val SubK set_meet_lb//; exists x.
+- move=> x ubx; rewrite -le_val SubK set_meet_ge_lb// => _ [y By <-].
+  by rewrite le_val ubx.
 Qed.
 
 HB.instance Definition _ := POrder_isMeetCompleteLattice.Build d' U
@@ -717,14 +719,17 @@ HB.instance Definition _ := POrder_isMeetCompleteLattice.Build d' U
 
 Lemma val1 : (val : U -> T) \top = \top.
 Proof. by rewrite SubK image_set0 set_meet0. Qed.
+#[warning="-HB.no-new-instance"]
 HB.instance Definition _ := Order.isTSubLattice.Build d T S d' U val1.
 
 Lemma valI : Order.meet_morphism (val : U -> T).
 Proof. by move=> x y; rewrite SubK !image_setU !image_set1 set_meet2. Qed.
+#[warning="-HB.no-new-instance"]
 HB.instance Definition _ := Order.isMeetSubLattice.Build d T S d' U valI.
 
 Lemma valSM : set_meet_morphism (val : U -> T).
 Proof. by move=> B; rewrite SubK. Qed.
+#[warning="-HB.no-new-instance"]
 HB.instance Definition _ := isMeetSubCompleteLattice.Build d T S d' U valSM.
 
 HB.end.
@@ -759,9 +764,9 @@ Let set_joinU (B : set U) := inU (opredSJ B).
 Lemma set_joinU_is_lub : set_f_is_lub set_joinU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub SubK set_join_ub//; exists x.
-- move=> x ubx; rewrite leEsub SubK set_join_le_ub// => _ [y By <-].
-  by rewrite -leEsub ubx.
+- by move=> x Bx; rewrite -le_val SubK set_join_ub//; exists x.
+- move=> x ubx; rewrite -le_val SubK set_join_le_ub// => _ [y By <-].
+  by rewrite le_val ubx.
 Qed.
 
 HB.instance Definition _ := POrder_isJoinCompleteLattice.Build d' U
@@ -769,6 +774,7 @@ HB.instance Definition _ := POrder_isJoinCompleteLattice.Build d' U
 
 Lemma val0 : (val : U -> T) \bot = \bot.
 Proof. by rewrite SubK image_set0 set_join0. Qed.
+#[warning="-HB.no-new-instance"]
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
 Lemma valU : Order.join_morphism (val : U -> T).
@@ -816,17 +822,17 @@ Let set_joinU (B : set U) := inU (opredSJ B).
 Lemma set_meetU_is_glb : set_f_is_glb set_meetU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub SubK set_meet_lb//; exists x.
-- move=> x lbx; rewrite leEsub SubK set_meet_ge_lb// => _ [y By <-].
-  by rewrite -leEsub lbx.
+- by move=> x Bx; rewrite -le_val SubK set_meet_lb//; exists x.
+- move=> x lbx; rewrite -le_val SubK set_meet_ge_lb// => _ [y By <-].
+  by rewrite le_val lbx.
 Qed.
 
 Lemma set_joinU_is_lub : set_f_is_lub set_joinU.
 Proof.
 move=> B; split.
-- by move=> x Bx; rewrite leEsub SubK set_join_ub//; exists x.
-- move=> x ubx; rewrite leEsub SubK set_join_le_ub// => _ [y By <-].
-  by rewrite -leEsub ubx.
+- by move=> x Bx; rewrite -le_val SubK set_join_ub//; exists x.
+- move=> x ubx; rewrite -le_val SubK set_join_le_ub// => _ [y By <-].
+  by rewrite le_val ubx.
 Qed.
 
 HB.instance Definition _ := POrder_isCompleteLattice.Build d' U
@@ -834,6 +840,7 @@ HB.instance Definition _ := POrder_isCompleteLattice.Build d' U
 
 Lemma val0 : (val : U -> T) \bot = \bot.
 Proof. by rewrite SubK image_set0 set_join0. Qed.
+#[warning="-HB.no-new-instance"]
 HB.instance Definition _ := Order.isBSubLattice.Build d T S d' U val0.
 
 Lemma val1 : (val : U -> T) \top = \top.
