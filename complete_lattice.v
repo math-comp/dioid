@@ -65,7 +65,7 @@ Definition set_f_is_glb d (T : porderType d) (set_f : set T -> T) :=
 Definition set_f_is_lub d (T : porderType d) (set_f : set T -> T) :=
   forall S, ubound S (set_f S) /\ forall x, ubound S x -> set_f S <= x.
 
-HB.mixin Record isCompleteLattice d T of Order.POrder d T := {
+HB.mixin Record isCompleteLattice d T & Order.POrder d T := {
   set_meet : set T -> T;
   set_meet_is_glb : set_f_is_glb set_meet;
   set_join : set T -> T;
@@ -76,14 +76,14 @@ HB.mixin Record isCompleteLattice d T of Order.POrder d T := {
 HB.structure Definition CompleteLattice d :=
   { T of Order.TBLattice d T & isCompleteLattice d T }.
 
-HB.factory Record POrder_isCompleteLattice d T of Order.POrder d T := {
+HB.factory Record POrder_isCompleteLattice d T & Order.POrder d T := {
   set_meet : set T -> T;
   set_meet_is_glb : set_f_is_glb set_meet;
   set_join : set T -> T;
   set_join_is_lub : set_f_is_lub set_join;
 }.
 
-HB.builders Context d T of POrder_isCompleteLattice d T.
+HB.builders Context d T & POrder_isCompleteLattice d T.
 
 Lemma set_join_ub S : ubound S (set_join S).
 Proof. exact: (set_join_is_lub S).1. Qed.
@@ -231,12 +231,12 @@ HB.instance Definition _ := isCompleteLattice.Build d T
 
 HB.end.
 
-HB.factory Record POrder_isMeetCompleteLattice d T of Order.POrder d T := {
+HB.factory Record POrder_isMeetCompleteLattice d T & Order.POrder d T := {
   set_meet : set T -> T;
   set_meet_is_glb : set_f_is_glb set_meet;
 }.
 
-HB.builders Context d T of POrder_isMeetCompleteLattice d T.
+HB.builders Context d T & POrder_isMeetCompleteLattice d T.
 Definition set_join S := set_meet (ubound S).
 Lemma set_join_is_lub : set_f_is_lub set_join.
 Proof.
@@ -247,12 +247,12 @@ HB.instance Definition _ := POrder_isCompleteLattice.Build d T
   set_meet_is_glb set_join_is_lub.
 HB.end.
 
-HB.factory Record POrder_isJoinCompleteLattice d T of Order.POrder d T := {
+HB.factory Record POrder_isJoinCompleteLattice d T & Order.POrder d T := {
   set_join : set T -> T;
   set_join_is_lub : set_f_is_lub set_join;
 }.
 
-HB.builders Context d T of POrder_isJoinCompleteLattice d T.
+HB.builders Context d T & POrder_isJoinCompleteLattice d T.
 Definition set_meet S := set_join (lbound S).
 Lemma set_meet_is_glb : set_f_is_glb set_meet.
 Proof.
@@ -454,11 +454,11 @@ HB.structure Definition CompleteLatticeMorphism
 
 HB.factory Record isMeetCompleteLatticeMorphism d (L : completeLatticeType d)
     d' (L' : completeLatticeType d') (apply : L -> L')
-    of @Order.OrderMorphism d L d' L' apply := {
+    & @Order.OrderMorphism d L d' L' apply := {
   omorphSM : set_meet_morphism apply;
 }.
 
-HB.builders Context d L d' L' f of isMeetCompleteLatticeMorphism d L d' L' f.
+HB.builders Context d L d' L' f & isMeetCompleteLatticeMorphism d L d' L' f.
 Lemma omorphI : Order.meet_morphism f.
 Proof. by move=> x y; rewrite -!set_meet2 omorphSM !image_setU !image_set1. Qed.
 HB.instance Definition _ := Order.isMeetLatticeMorphism.Build d L d' L' f
@@ -471,11 +471,11 @@ HB.end.
 
 HB.factory Record isJoinCompleteLatticeMorphism d (L : completeLatticeType d)
     d' (L' : completeLatticeType d') (apply : L -> L')
-    of @Order.OrderMorphism d L d' L' apply := {
+    & @Order.OrderMorphism d L d' L' apply := {
   omorphSJ : set_join_morphism apply;
 }.
 
-HB.builders Context d L d' L' f of isJoinCompleteLatticeMorphism d L d' L' f.
+HB.builders Context d L d' L' f & isJoinCompleteLatticeMorphism d L d' L' f.
 Lemma omorphU : Order.join_morphism f.
 Proof. by move=> x y; rewrite -!set_join2 omorphSJ !image_setU !image_set1. Qed.
 HB.instance Definition _ := Order.isJoinLatticeMorphism.Build d L d' L' f
@@ -488,12 +488,12 @@ HB.end.
 
 HB.factory Record isCompleteLatticeMorphism d (L : completeLatticeType d)
     d' (L' : completeLatticeType d') (apply : L -> L')
-    of @Order.OrderMorphism d L d' L' apply := {
+    & @Order.OrderMorphism d L d' L' apply := {
   omorphSM : set_meet_morphism apply;
   omorphSJ : set_join_morphism apply;
 }.
 
-HB.builders Context d L d' L' f of isCompleteLatticeMorphism d L d' L' f.
+HB.builders Context d L d' L' f & isCompleteLatticeMorphism d L d' L' f.
 HB.instance Definition _ := isMeetCompleteLatticeMorphism.Build d L d' L' f
   omorphSM.
 HB.instance Definition _ := isJoinCompleteLatticeMorphism.Build d L d' L' f
@@ -611,7 +611,7 @@ HB.factory Record isMeetCompleteLatticeClosed d (T : completeLatticeType d)
   opredSM : set_meet_closed S;
 }.
 
-HB.builders Context d T S of isMeetCompleteLatticeClosed d T S.
+HB.builders Context d T S & isMeetCompleteLatticeClosed d T S.
 Lemma opred1 : \top \in S. Proof. by rewrite -set_meet0 opredSM. Qed.
 HB.instance Definition _ := Order.isTLatticeClosed.Build d T S opred1.
 Lemma opredI : meet_closed S.
@@ -625,7 +625,7 @@ HB.factory Record isJoinCompleteLatticeClosed d (T : completeLatticeType d)
   opredSJ : set_join_closed S;
 }.
 
-HB.builders Context d T S of isJoinCompleteLatticeClosed d T S.
+HB.builders Context d T S & isJoinCompleteLatticeClosed d T S.
 Lemma opred0 : \bot \in S. Proof. by rewrite -set_join0 opredSJ. Qed.
 HB.instance Definition _ := Order.isBLatticeClosed.Build d T S opred0.
 Lemma opredU : join_closed S.
@@ -640,7 +640,7 @@ HB.factory Record isCompleteLatticeClosed d (T : completeLatticeType d)
   opredSJ : set_join_closed S;
 }.
 
-HB.builders Context d T S of isCompleteLatticeClosed d T S.
+HB.builders Context d T S & isCompleteLatticeClosed d T S.
 HB.instance Definition _ := isMeetCompleteLatticeClosed.Build d T S opredSM.
 HB.instance Definition _ := isJoinCompleteLatticeClosed.Build d T S opredSJ.
 HB.end.
@@ -649,12 +649,12 @@ Arguments opredSM {d T} _.
 Arguments opredSJ {d T} _.
 
 HB.mixin Record isMeetSubCompleteLattice d (T : completeLatticeType d)
-    (S : pred T) d' U of SubType T S U & CompleteLattice d' U := {
+    (S : pred T) d' U & SubType T S U & CompleteLattice d' U := {
   valSM_subproof : set_meet_morphism (val : U -> T);
 }.
 
 HB.mixin Record isJoinSubCompleteLattice d (T : completeLatticeType d)
-    (S : pred T) d' U of SubType T S U & CompleteLattice d' U := {
+    (S : pred T) d' U & SubType T S U & CompleteLattice d' U := {
   valSJ_subproof : set_join_morphism (val : U -> T);
 }.
 
@@ -691,11 +691,11 @@ HB.instance Definition _ (d : Order.disp_t) (T : completeLatticeType d)
   isJoinCompleteLatticeMorphism.Build d' U d T val valSJ_subproof.
 
 HB.factory Record SubPOrder_isMeetSubCompleteLattice d
-    (T : completeLatticeType d) S d' U of @Order.SubPOrder d T S d' U := {
+    (T : completeLatticeType d) S d' U & @Order.SubPOrder d T S d' U := {
   opredSM_subproof : set_meet_closed S;
 }.
 
-HB.builders Context d T S d' U of SubPOrder_isMeetSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubPOrder_isMeetSubCompleteLattice d T S d' U.
 
 HB.instance Definition _ := isMeetCompleteLatticeClosed.Build d T S
   opredSM_subproof.
@@ -735,22 +735,22 @@ HB.instance Definition _ := isMeetSubCompleteLattice.Build d T S d' U valSM.
 HB.end.
 
 HB.factory Record SubChoice_isMeetSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U & SubChoice T S U := {
   opredSM_subproof : set_meet_closed S;
 }.
 
-HB.builders Context d T S d' U of SubChoice_isMeetSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubChoice_isMeetSubCompleteLattice d T S d' U.
 HB.instance Definition _ := Order.SubChoice_isSubPOrder.Build d T S d' U.
 HB.instance Definition _ := SubPOrder_isMeetSubCompleteLattice.Build d T S d' U
   opredSM_subproof.
 HB.end.
 
 HB.factory Record SubPOrder_isJoinSubCompleteLattice d
-    (T : completeLatticeType d) S d' U of @Order.SubPOrder d T S d' U := {
+    (T : completeLatticeType d) S d' U & @Order.SubPOrder d T S d' U := {
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d T S d' U of SubPOrder_isJoinSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubPOrder_isJoinSubCompleteLattice d T S d' U.
 
 HB.instance Definition _ := isJoinCompleteLatticeClosed.Build d T S
   opredSJ_subproof.
@@ -788,23 +788,23 @@ HB.instance Definition _ := isJoinSubCompleteLattice.Build d T S d' U valSJ.
 HB.end.
 
 HB.factory Record SubChoice_isJoinSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U & SubChoice T S U := {
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d T S d' U of SubChoice_isJoinSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubChoice_isJoinSubCompleteLattice d T S d' U.
 HB.instance Definition _ := Order.SubChoice_isSubPOrder.Build d T S d' U.
 HB.instance Definition _ := SubPOrder_isJoinSubCompleteLattice.Build d T S d' U
   opredSJ_subproof.
 HB.end.
 
 HB.factory Record SubPOrder_isSubCompleteLattice d
-    (T : completeLatticeType d) S d' U of @Order.SubPOrder d T S d' U := {
+    (T : completeLatticeType d) S d' U & @Order.SubPOrder d T S d' U := {
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d T S d' U of SubPOrder_isSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubPOrder_isSubCompleteLattice d T S d' U.
 
 HB.instance Definition _ := isCompleteLatticeClosed.Build d T S
   opredSM_subproof opredSJ_subproof.
@@ -866,12 +866,12 @@ HB.instance Definition _ := isJoinSubCompleteLattice.Build d T S d' U valSJ.
 HB.end.
 
 HB.factory Record SubChoice_isSubCompleteLattice d
-    (T : completeLatticeType d) S (d' : Order.disp_t) U of SubChoice T S U := {
+    (T : completeLatticeType d) S (d' : Order.disp_t) U & SubChoice T S U := {
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d T S d' U of SubChoice_isSubCompleteLattice d T S d' U.
+HB.builders Context d T S d' U & SubChoice_isSubCompleteLattice d T S d' U.
 HB.instance Definition _ := Order.SubChoice_isSubPOrder.Build d T S d' U.
 HB.instance Definition _ := SubPOrder_isSubCompleteLattice.Build d T S d' U
   opredSM_subproof opredSJ_subproof.

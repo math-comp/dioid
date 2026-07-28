@@ -59,7 +59,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
 Reserved Notation "x ^+" (at level 2, format "x ^+").
-Reserved Notation "x ^*" (at level 2, format "x ^*").
+Reserved Notation "x ^*" (at level 1, left associativity, format "x ^*").
 
 Local Open Scope classical_set_scope.
 Local Open Scope ring_scope.
@@ -68,7 +68,7 @@ Local Open Scope dioid_scope.
 
 Import Order.Theory GRing.Theory.
 
-HB.mixin Record isCompleteDioid d D of Dioid d D & CompleteLattice d D := {
+HB.mixin Record isCompleteDioid d D & Dioid d D & CompleteLattice d D := {
   set_mulDl : forall (a : D) (B : set D),
       a * set_join B = set_join [set a * x | x in B];
   set_mulDr : forall (a : D) (B : set D),
@@ -435,15 +435,15 @@ Notation "a / b" := (div a b) : dioid_scope.
 
 #[short(type="comCompleteDioidType")]
 HB.structure Definition ComCompleteDioid d :=
-  { D of GRing.ComSemiRing D & CompleteDioid d D }.
+  { D of GRing.ComNzSemiRing D & CompleteDioid d D }.
 
 HB.factory Record isComCompleteDioid d D
-    of ComDioid d D & CompleteLattice d D := {
+    & ComDioid d D & CompleteLattice d D := {
   set_mulDl : forall (a : D) (B : set D),
     a * set_join B = set_join [set a * x | x in B];
 }.
 
-HB.builders Context d D of isComCompleteDioid d D.
+HB.builders Context d D & isComCompleteDioid d D.
 Lemma set_mulDr a (B : set D) :
   set_join B * a = set_join [set x * a | x in B].
 Proof.
@@ -454,7 +454,7 @@ HB.instance Definition _ := isCompleteDioid.Build d D set_mulDl set_mulDr.
 HB.end.
 
 HB.factory Record CompleteLattice_isComCompleteDioid d D
-    of CompleteLattice d D := {
+    & CompleteLattice d D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -474,7 +474,7 @@ HB.factory Record CompleteLattice_isComCompleteDioid d D
     mul a (set_join B) = set_join [set mul a x | x in B];
 }.
 
-HB.builders Context d D of CompleteLattice_isComCompleteDioid d D.
+HB.builders Context d D & CompleteLattice_isComCompleteDioid d D.
 HB.instance Definition _ := POrder_isComDioid.Build d D
   addA addC add0d adddd mulA mulC mul1d mulDl mul0d oner_neq0 le_def.
 HB.instance Definition _ := isComCompleteDioid.Build d D set_mulDl.
@@ -552,10 +552,10 @@ HB.structure Definition SubCompleteDioid d (D : completeDioidType d) S d' :=
 
 HB.factory Record SubDioid_JoinSubCompleteLattice_isJoinSubCompleteDioid
     d (D : completeDioidType d) S d' U
-    of @SubDioid d D S d' U & @JoinSubCompleteLattice d D S d' U := {}.
+    & @SubDioid d D S d' U & @JoinSubCompleteLattice d D S d' U := {}.
 
 HB.builders Context d D S d' U
-  of SubDioid_JoinSubCompleteLattice_isJoinSubCompleteDioid d D S d' U.
+  & SubDioid_JoinSubCompleteLattice_isJoinSubCompleteDioid d D S d' U.
 Lemma set_mulDl (a : U) (B : set U) :
   a * set_join B = set_join [set a * x | x in B].
 Proof.
@@ -573,12 +573,12 @@ HB.end.
 
 HB.factory Record SubDioid_SubPOrder_isJoinSubCompleteDioid d
     (D : completeDioidType d) S d' U
-    of @SubDioid d D S d' U & @Order.SubPOrder d D S d' U := {
+    & @SubDioid d D S d' U & @Order.SubPOrder d D S d' U := {
   opredSJ_subproof : set_join_closed S;
 }.
 
 HB.builders Context d D S d' U
-  of SubDioid_SubPOrder_isJoinSubCompleteDioid d D S d' U.
+  & SubDioid_SubPOrder_isJoinSubCompleteDioid d D S d' U.
 HB.instance Definition _ := SubPOrder_isJoinSubCompleteLattice.Build d D S d' U
   opredSJ_subproof.
 HB.instance Definition _ :=
@@ -586,12 +586,12 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isJoinSubCompleteDioid d (D : completeDioidType d)
-    S (d' : Order.disp_t) U of SubChoice D S U := {
+    S (d' : Order.disp_t) U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d D S d' U of SubChoice_isJoinSubCompleteDioid d D S d' U.
+HB.builders Context d D S d' U & SubChoice_isJoinSubCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isSubDioid.Build d D S d' U
   semiring_closed_subproof.
 HB.instance Definition _ :=
@@ -599,24 +599,24 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isJoinSubComCompleteDioid d
-    (D : comCompleteDioidType d) S (d' : Order.disp_t) U of SubChoice D S U := {
+    (D : comCompleteDioidType d) S (d' : Order.disp_t) U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
 HB.builders Context d D S d' U
-  of SubChoice_isJoinSubComCompleteDioid d D S d' U.
+  & SubChoice_isJoinSubComCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isJoinSubCompleteDioid.Build d D S d' U
   semiring_closed_subproof opredSJ_subproof.
-HB.instance Definition _ := GRing.SubSemiRing_isSubComSemiRing.Build D S U.
+HB.instance Definition _ := GRing.SubNzSemiRing_isSubComNzSemiRing.Build D S U.
 HB.end.
 
 HB.factory Record SubDioid_SubCompleteLattice_isSubCompleteDioid
     d (D : completeDioidType d) S d' U
-    of @SubDioid d D S d' U & @SubCompleteLattice d D S d' U := {}.
+    & @SubDioid d D S d' U & @SubCompleteLattice d D S d' U := {}.
 
 HB.builders Context d D S d' U
-  of SubDioid_SubCompleteLattice_isSubCompleteDioid d D S d' U.
+  & SubDioid_SubCompleteLattice_isSubCompleteDioid d D S d' U.
 Lemma set_mulDl (a : U) (B : set U) :
   a * set_join B = set_join [set a * x | x in B].
 Proof.
@@ -634,13 +634,13 @@ HB.end.
 
 HB.factory Record SubDioid_SubPOrder_isSubCompleteDioid d
     (D : completeDioidType d) S d' U
-    of @SubDioid d D S d' U & @Order.SubPOrder d D S d' U := {
+    & @SubDioid d D S d' U & @Order.SubPOrder d D S d' U := {
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
 HB.builders Context d D S d' U
-  of SubDioid_SubPOrder_isSubCompleteDioid d D S d' U.
+  & SubDioid_SubPOrder_isSubCompleteDioid d D S d' U.
 HB.instance Definition _ := SubPOrder_isSubCompleteLattice.Build d D S d' U
   opredSM_subproof opredSJ_subproof.
 HB.instance Definition _ :=
@@ -648,13 +648,13 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isSubCompleteDioid d (D : completeDioidType d) S
-    (d' : Order.disp_t) U of SubChoice D S U := {
+    (d' : Order.disp_t) U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
-HB.builders Context d D S d' U of SubChoice_isSubCompleteDioid d D S d' U.
+HB.builders Context d D S d' U & SubChoice_isSubCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isSubDioid.Build d D S d' U
   semiring_closed_subproof.
 HB.instance Definition _ :=
@@ -663,17 +663,17 @@ HB.instance Definition _ :=
 HB.end.
 
 HB.factory Record SubChoice_isSubComCompleteDioid d
-    (D : comCompleteDioidType d) S (d' : Order.disp_t) U of SubChoice D S U := {
+    (D : comCompleteDioidType d) S (d' : Order.disp_t) U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
   opredSM_subproof : set_meet_closed S;
   opredSJ_subproof : set_join_closed S;
 }.
 
 HB.builders Context d D S d' U
-  of SubChoice_isSubComCompleteDioid d D S d' U.
+  & SubChoice_isSubComCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isSubCompleteDioid.Build d D S d' U
   semiring_closed_subproof opredSM_subproof opredSJ_subproof.
-HB.instance Definition _ := GRing.SubSemiRing_isSubComSemiRing.Build D S U.
+HB.instance Definition _ := GRing.SubNzSemiRing_isSubComNzSemiRing.Build D S U.
 HB.end.
 
 Notation "[ 'SubDioid_JoinSubCompleteLattice_isJoinSubCompleteDioid' 'of' U 'by' <: ]" :=
