@@ -253,7 +253,7 @@ suff Hyp : forall i, (a + 1) ^ i = set_add [set a ^ j | j in [set x | 'I_i.+1 x]
 elim=> [ | i IHi]; [by rewrite set_add1 !exp0|].
 rewrite expS mulrDl mul1r IHi set_mulDl.
 set B' := [set a ^ j | j in [set j | (1 <= j <= i)%N]].
-rewrite [X in set_join X](_ : _ = a ^ i.+1 |` B'); last first.
+rewrite [X in set_join X](_ : _ = a ^ i.+1 |` B').
 { rewrite predeqP => x; split.
   - move=> -[y [[j Hj] _ <-] <-].
     rewrite expS /= -!expS.
@@ -263,7 +263,7 @@ rewrite [X in set_join X](_ : _ = a ^ i.+1 |` B'); last first.
     move=> -[[//|j] /andP [Hj Hji] <-]; rewrite expS; exists (a ^ j) => //.
     by move: Hji => /ltnW; rewrite -ltnS => Hji; exists (Ordinal Hji). }
 rewrite -[set_join]/set_add set_addDl.
-rewrite (_ : image _ _ = (1%R |` B')); last first.
+rewrite (_ : image _ _ = (1%R |` B')).
 { rewrite predeqP => x; split.
   { move=> -[[[|j] Hj] _ <-]; [by left; rewrite exp0|].
     by right; exists (Ordinal Hj). }
@@ -286,7 +286,7 @@ Lemma kleene_sqr a : a^* * a^* = a^*.
 Proof.
 rewrite {1}/op_kleene set_mulDr.
 set B' := (a ^* |` (range (fun i => a ^ i.+1 * a ^*))).
-rewrite (_ : image _ _ = B'); last first.
+rewrite (_ : image _ _ = B').
 { rewrite predeqP => x; split.
   - by move=> -[_ [[|i] _ <-] <-]; [left; rewrite exp0 mul1r|right; exists i].
   - move=> [-> | [i _ <-]]; [by exists 1%R; [exists O|rewrite mul1r]|].
@@ -310,7 +310,7 @@ Qed.
 Lemma kleene_kleene a : (a ^*) ^* = a ^*.
 Proof.
 rewrite kleeneSr /op_plus.
-rewrite (_ : image _ _ = a ^* |` set0).
+rewrite (_ : image _ _ = a ^* |` set0); last first.
   by rewrite setU0 set_join1 kleeneSr addrA adddd.
 rewrite predeqP => x; split.
 - move=> [i _ <-]; left; exact: kleene_exp.
@@ -324,7 +324,7 @@ Theorem kleene_star_least a b : forall x, (x = a * x + b) -> a ^* * b <= x.
 Proof.
 move=> x Hx.
 rewrite set_mulDr.
-rewrite [X in set_join X](_ : _ = [set (a ^ i) * b | i in setT]); last first.
+rewrite [X in set_join X](_ : _ = [set (a ^ i) * b | i in setT]).
   rewrite predeqP => y; split.
   - by move=> [_ [i _ <-] <-]; exists i.
   - by move=> [i _ <-]; exists (a ^ i); [exists i|].
@@ -608,7 +608,7 @@ HB.builders Context d D S d' U
   & SubChoice_isJoinSubComCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isJoinSubCompleteDioid.Build d D S d' U
   semiring_closed_subproof opredSJ_subproof.
-HB.instance Definition _ := GRing.SubNzSemiRing_isSubComNzSemiRing.Build D S U.
+HB.instance Definition _ := GRing.SubSemiRing_isSubComSemiRing.Build D S U.
 HB.end.
 
 HB.factory Record SubDioid_SubCompleteLattice_isSubCompleteDioid
@@ -673,7 +673,7 @@ HB.builders Context d D S d' U
   & SubChoice_isSubComCompleteDioid d D S d' U.
 HB.instance Definition _ := SubChoice_isSubCompleteDioid.Build d D S d' U
   semiring_closed_subproof opredSM_subproof opredSJ_subproof.
-HB.instance Definition _ := GRing.SubNzSemiRing_isSubComNzSemiRing.Build D S U.
+HB.instance Definition _ := GRing.SubSemiRing_isSubComSemiRing.Build D S U.
 HB.end.
 
 Notation "[ 'SubDioid_JoinSubCompleteLattice_isJoinSubCompleteDioid' 'of' U 'by' <: ]" :=
