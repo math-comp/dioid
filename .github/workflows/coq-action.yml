@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: coq-community/docker-coq-action@v1
       with:
-        opam_file: 'coq-mathcomp-dioid.opam'
+        opam_file: 'rocq-mathcomp-dioid.opam'
         custom_image: ${{ matrix.image }}
         custom_script: |
           startGroup Print opam config
@@ -31,18 +31,18 @@ jobs:
           startGroup Update opam cache
             opam update -y
           endGroup
-          startGroup Build coq-mathcomp-dioid dependencies
-            opam pin add -n -y -k path coq-mathcomp-dioid .
-            opam remove coq-mathcomp-character coq-mathcomp-field coq-mathcomp-solvable # coq-mathcomp-algebra is enough
-            opam install -y -j ${NJOBS} coq-mathcomp-dioid --deps-only
+          startGroup Build rocq-mathcomp-dioid dependencies
+            opam pin add -n -y -k path rocq-mathcomp-dioid .
+            opam remove -y rocq-mathcomp-character rocq-mathcomp-field rocq-mathcomp-solvable # rocq-mathcomp-algebra is enough
+            opam install -y -j ${NJOBS} rocq-mathcomp-dioid --deps-only
             opam list
           endGroup
-          startGroup Build coq-mathcomp-dioid
-            opam install -y -v -j ${NJOBS} coq-mathcomp-dioid
+          startGroup Build rocq-mathcomp-dioid
+            opam install -y -v -j ${NJOBS} rocq-mathcomp-dioid
             opam list
           endGroup
           startGroup Uninstallation test
-            opam remove -y coq-mathcomp-dioid
+            opam remove -y rocq-mathcomp-dioid
           endGroup
 
 # See also:

@@ -1,7 +1,7 @@
 *~
-Makefile.coq
-Makefile.coq.conf
-.Makefile.coq.d
+Makefile.rocq
+Makefile.rocq.conf
+.Makefile.rocq.d
 .*.aux
 *.glob
 *.vo
