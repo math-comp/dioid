@@ -1,33 +1,33 @@
 # Makefile for dioid
 
 COQ_PROJ := _CoqProject
-COQ_MAKEFILE := Makefile.coq
-COQ_MAKE := +$(MAKE) -f $(COQ_MAKEFILE)
+ROCQ_MAKEFILE := Makefile.rocq
+ROCQ_MAKE := +$(MAKE) -f $(ROCQ_MAKEFILE)
 
-ifneq "$(COQBIN)" ""
-	COQBIN := $(COQBIN)/
+ifneq "$(ROCQBIN)" ""
+	ROCQBIN := $(ROCQBIN)/
 else
-	COQBIN := $(dir $(shell which coqc))
+	ROCQBIN := $(dir $(shell which coqc))
 endif
-export COQBIN
+export ROCQBIN
 
-all install html gallinahtml: $(COQ_MAKEFILE) Makefile
-	$(COQ_MAKE) $@
+all install html gallinahtml: $(ROCQ_MAKEFILE) Makefile
+	$(ROCQ_MAKE) $@
 
 %.vo: %.v
-	$(COQ_MAKE) $@
+	$(ROCQ_MAKE) $@
 
-$(COQ_MAKEFILE): $(COQ_PROJ)
-	$(COQBIN)coq_makefile -f $< -o $@
+$(ROCQ_MAKEFILE): $(COQ_PROJ)
+	$(ROCQBIN)rocq makefile -f $< -o $@
 
 clean:
-	-$(COQ_MAKE) clean
+	-$(ROCQ_MAKE) clean
 
 distclean: clean
-	$(RM) $(COQ_MAKEFILE) $(COQ_MAKEFILE).conf
+	$(RM) $(ROCQ_MAKEFILE) $(ROCQ_MAKEFILE).conf
 	$(RM) *~ .*.aux .lia.cache
 
 
--include $(COQ_MAKEFILE).conf
+-include $(ROCQ_MAKEFILE).conf
 
 .PHONY: all install html gallinahtml clean distclean

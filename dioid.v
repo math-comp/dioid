@@ -72,14 +72,14 @@ Local Open Scope dioid_scope.
 Import Order.Theory GRing.Theory.
 
 HB.mixin Record SemiRing_POrder_isDioid d D
-    of GRing.SemiRing D & Order.POrder d D := {
+    & GRing.NzSemiRing D & Order.POrder d D := {
   adddd : @idempotent_op D +%R;
   le_def : forall (a b : D), (a <= b) = (a + b == b);
 }.
 
 #[short(type="dioidType")]
 HB.structure Definition Dioid d :=
-  { D of SemiRing_POrder_isDioid d D & GRing.SemiRing D & Order.POrder d D }.
+  { D of SemiRing_POrder_isDioid d D & GRing.NzSemiRing D & Order.POrder d D }.
 
 #[short(type="dioidLatticeType")]
 HB.structure Definition DioidLattice d :=
@@ -97,7 +97,7 @@ HB.structure Definition DioidTLattice d :=
 HB.structure Definition DioidTBLattice d :=
   { D of Dioid d D & Order.TBLattice d D }.
 
-HB.factory Record POrder_isDioid d D of Order.POrder d D := {
+HB.factory Record POrder_isDioid d D & Order.POrder d D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -117,17 +117,17 @@ HB.factory Record POrder_isDioid d D of Order.POrder d D := {
   le_def : forall (a b : D), (a <= b) = (add a b == b);
 }.
 
-HB.builders Context d D of POrder_isDioid d D.
-HB.instance Definition _ := GRing.isSemiRing.Build D addA addC add0d
+HB.builders Context d D & POrder_isDioid d D.
+HB.instance Definition _ := GRing.isNzSemiRing.Build D addA addC add0d
   mulA mul1d muld1 mulDl mulDr mul0d muld0 oner_neq0.
 HB.instance Definition _ := SemiRing_POrder_isDioid.Build d D adddd le_def.
 HB.end.
 
-HB.factory Record SemiRing_isDioid (d : Order.disp_t) D of GRing.SemiRing D := {
+HB.factory Record SemiRing_isDioid (d : Order.disp_t) D & GRing.NzSemiRing D := {
   adddd : @idempotent_op D +%R;
 }.
 
-HB.builders Context d D of SemiRing_isDioid d D.
+HB.builders Context d D & SemiRing_isDioid d D.
 
 Definition le_dioid (a b : D) := a + b == b.
 
@@ -160,7 +160,7 @@ HB.instance Definition _ := SemiRing_POrder_isDioid.Build d D adddd le_def.
 
 HB.end.
 
-HB.factory Record Choice_isDioid (d : Order.disp_t) D of Choice D := {
+HB.factory Record Choice_isDioid (d : Order.disp_t) D & Choice D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -179,8 +179,8 @@ HB.factory Record Choice_isDioid (d : Order.disp_t) D of Choice D := {
   oner_neq0 : one != zero;
 }.
 
-HB.builders Context d D of Choice_isDioid d D.
-HB.instance Definition _ := GRing.isSemiRing.Build D addA addC add0d
+HB.builders Context d D & Choice_isDioid d D.
+HB.instance Definition _ := GRing.isNzSemiRing.Build D addA addC add0d
   mulA mul1d muld1 mulDl mulDr mul0d muld0 oner_neq0.
 HB.instance Definition _ := SemiRing_isDioid.Build d D adddd.
 HB.end.
@@ -231,9 +231,9 @@ Proof. move=> ac bd; exact/(le_trans (led_mul2r _ ac))/led_mul2l. Qed.
 End DioidTheory.
 
 #[short(type="comDioidType")]
-HB.structure Definition ComDioid d := { D of GRing.ComSemiRing D & Dioid d D }.
+HB.structure Definition ComDioid d := { D of GRing.ComNzSemiRing D & Dioid d D }.
 
-HB.factory Record POrder_isComDioid d D of Order.POrder d D := {
+HB.factory Record POrder_isComDioid d D & Order.POrder d D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -251,7 +251,7 @@ HB.factory Record POrder_isComDioid d D of Order.POrder d D := {
   le_def : forall (a b : D), (a <= b) = (add a b == b);
 }.
 
-HB.builders Context d D of POrder_isComDioid d D.
+HB.builders Context d D & POrder_isComDioid d D.
 
 Lemma muld1 : right_id one mul.
 Proof. by move=> x; rewrite mulC mul1d. Qed.
@@ -269,7 +269,7 @@ HB.instance Definition _ := GRing.SemiRing_hasCommutativeMul.Build D mulC.
 
 HB.end.
 
-HB.factory Record Choice_isComDioid (d : Order.disp_t) D of Choice D := {
+HB.factory Record Choice_isComDioid (d : Order.disp_t) D & Choice D := {
   zero : D;
   add : D -> D -> D;
   one : D;
@@ -286,7 +286,7 @@ HB.factory Record Choice_isComDioid (d : Order.disp_t) D of Choice D := {
   oner_neq0 : one != zero;
 }.
 
-HB.builders Context d D of Choice_isComDioid d D.
+HB.builders Context d D & Choice_isComDioid d D.
 
 Lemma muld1 : right_id one mul.
 Proof. by move=> x; rewrite mulC mul1d. Qed.
@@ -306,7 +306,7 @@ HB.end.
 
 #[short(type="subDioidType")]
 HB.structure Definition SubDioid d (D : dioidType d) (S : pred D) d' :=
-  { U of GRing.SubSemiRing D S U & @Order.SubPOrder d D S d' U & Dioid d' U }.
+  { U of GRing.SubNzSemiRing D S U & @Order.SubPOrder d D S d' U & Dioid d' U }.
 
 #[short(type="subDioidLatticeType")]
 HB.structure Definition SubDioidLattice d (D : dioidLatticeType d) S d' :=
@@ -325,9 +325,9 @@ HB.structure Definition SubDioidTBLattice d (D : dioidLatticeType d) S d' :=
   { U of @SubDioid d D S d' U & @Order.TBLattice d' U }.
 
 HB.factory Record SubSemiRing_SubPOrder_isSubDioid d (D : dioidType d) S d' U
-    of GRing.SubSemiRing D S U & @Order.SubPOrder d D S d' U := {}.
+    & GRing.SubNzSemiRing D S U & @Order.SubPOrder d D S d' U := {}.
 
-HB.builders Context d D S d' U of SubSemiRing_SubPOrder_isSubDioid d D S d' U.
+HB.builders Context d D S d' U & SubSemiRing_SubPOrder_isSubDioid d D S d' U.
 Lemma adddd : @idempotent_op U +%R.
 Proof. by move=> x; apply: val_inj; rewrite raddfD adddd. Qed.
 Lemma le_def (a b : U) : (a <= b) = (a + b == b).
@@ -336,13 +336,13 @@ HB.instance Definition _ := SemiRing_POrder_isDioid.Build d' U adddd le_def.
 HB.end.
 
 HB.factory Record SubChoice_isSubDioid d (D : dioidType d) S (d' : Order.disp_t)
-    U of SubChoice D S U := {
+    U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S;
 }.
 
 HB.builders Context d (D : dioidType d) S d' U
-  of SubChoice_isSubDioid d D S d' U.
-HB.instance Definition _ := GRing.SubChoice_isSubSemiRing.Build D S U
+  & SubChoice_isSubDioid d D S d' U.
+HB.instance Definition _ := GRing.SubChoice_isSubNzSemiRing.Build D S U
   semiring_closed_subproof.
 HB.instance Definition _ := Order.SubChoice_isSubPOrder.Build d D S d' U.
 HB.instance Definition _ := SubSemiRing_SubPOrder_isSubDioid.Build d D S d' U.
@@ -353,22 +353,22 @@ HB.structure Definition SubComDioid d (D : comDioidType d) (S : pred D) d' :=
   {U of @SubDioid d D S d' U & ComDioid d' U}.
 
 HB.factory Record SubComSemiRing_SubPOrder_isSubComDioid d (D : comDioidType d)
-  S (d' : Order.disp_t) U of GRing.SubComSemiRing D S U & @Order.SubPOrder d D S
+  S (d' : Order.disp_t) U & GRing.SubComNzSemiRing D S U & @Order.SubPOrder d D S
   d' U := {}.
 
 HB.builders Context d D S d' U
-  of SubComSemiRing_SubPOrder_isSubComDioid d D S d' U.
+  & SubComSemiRing_SubPOrder_isSubComDioid d D S d' U.
 HB.instance Definition _ := SubSemiRing_SubPOrder_isSubDioid.Build d D S d' U.
 HB.end.
 
 HB.factory Record SubChoice_isSubComDioid d (D : comDioidType d) S
-    (d' : Order.disp_t) U of SubChoice D S U := {
+    (d' : Order.disp_t) U & SubChoice D S U := {
   semiring_closed_subproof : semiring_closed S
 }.
 
 HB.builders Context d (D : comDioidType d) S d' U
-  of SubChoice_isSubComDioid d D S d' U.
-HB.instance Definition _ := GRing.SubChoice_isSubComSemiRing.Build D S U
+  & SubChoice_isSubComDioid d D S d' U.
+HB.instance Definition _ := GRing.SubChoice_isSubComNzSemiRing.Build D S U
   semiring_closed_subproof.
 HB.instance Definition _ := Order.SubChoice_isSubPOrder.Build d D S d' U.
 HB.instance Definition _ := SubSemiRing_SubPOrder_isSubDioid.Build d D S d' U.

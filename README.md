@@ -17,16 +17,15 @@ Installation
 Dependencies
 ------------
 
-* Coq (>= 8.20)
-* The Mathcomp library (>= 2.3.0)
-* Hierarchy Builder (= 1.8.0)
-* Mathcomp classical (= 1.8.0)
+* Rocq (>= 9.2)
+* The Mathcomp library (>= 2.6.0)
+* Mathcomp classical (>= 1.17.0)
 
 Dependencies can be installed with OPAM (>= 2.0) by typing:
 
 ```
 % opam repo add coq-released https://coq.inria.fr/opam/released
-% opam install coq.8.20.1 coq-mathcomp-algebra.2.3.0 coq-mathcomp-classical.1.8.0
+% opam install coq-core.9.0.1 rocq-mathcomp-algebra.2.6.0 rocq-mathcomp-classical
 ```
 
 Compilation
