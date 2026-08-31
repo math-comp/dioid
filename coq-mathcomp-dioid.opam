@@ -11,6 +11,6 @@ license: "CECILL-B"
 
 depends: [
   "coq-core"
-  "rocq-mathcomp-diod"
+  "rocq-mathcomp-dioid"
 ]
 synopsis: "Compatibility package for rocq-mathcomp-dioid"
